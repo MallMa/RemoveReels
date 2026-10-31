@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RemoveReels</string>
+    <string name="rules">Rules</string>
+    <string name="rules_title">%1$s rules · v%2$s</string>
+    <string name="apply">Apply</string>
+    <string name="cancel">Cancel</string>
+    <string name="reset_stats">Reset stats</string>
+    <string name="status_off">Off</string>
+    <string name="status_no_data">No data yet</string>
+    <string name="status_route_idle">Not triggered yet</string>
+    <string name="status_route_hits">Triggered %1$d×</string>
+    <!-- Label: value pairs, so translations need no plural forms. -->
+    <string name="status_hidden">Hidden: %1$d · Pages: %2$d</string>
+    <string name="status_canary_ok">✓ Working · seen %1$d/%2$d</string>
+    <string name="status_canary_broken">⚠ Possibly broken · missing %1$d/%2$d</string>
+    <string name="no_app_for_link">No app can open this link</string>
+</resources>

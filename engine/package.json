@@ -1,0 +1,11 @@
+{
+  "name": "removereels-engine",
+  "private": true,
+  "description": "Rule engine shared by the RemoveReels apps, plus tests for it and for the rule lists in ../rules",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

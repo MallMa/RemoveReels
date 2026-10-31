@@ -1,0 +1,76 @@
+{
+  "schema": 0,
+  "platform": "instagram",
+  "name": "Instagram",
+  "version": "2026.10.31",
+  "startUrl": "https://www.instagram.com/",
+  "homePath": "/",
+  "origins": ["https://www.instagram.com"],
+  "hosts": ["instagram.com", "facebook.com"],
+  "rules": [
+    {
+      "id": "ig-reel-swipe",
+      "name": "Watch a reel you were sent, but not the next one",
+      "type": "route",
+      "match": "^/reels?/[^/?#]+",
+      "from": "^/reels?/[^/?#]+",
+      "on": "spa",
+      "action": "block",
+      "message": "That was the reel you were sent. Swiping to the next one is blocked.",
+      "default": true
+    },
+    {
+      "id": "ig-reels-link",
+      "name": "Open reel links as a single post",
+      "type": "route",
+      "match": "^/reels/([A-Za-z0-9_-]+)",
+      "action": "redirect",
+      "to": "/reel/$1/",
+      "default": true
+    },
+    {
+      "id": "ig-reels-tab",
+      "name": "Block the Reels feed",
+      "type": "route",
+      "match": "^/reels/?(\\?.*)?$",
+      "action": "block",
+      "message": "The Reels feed is blocked.",
+      "default": true
+    },
+    {
+      "id": "ig-reels-nav",
+      "name": "Hide the Reels button",
+      "type": "hide",
+      "selector": "a[href=\"/reels/\"], a[href^=\"/reels/?\"]",
+      "canary": true,
+      "canaryWhen": "a[href^=\"/direct/inbox\"]",
+      "default": true
+    },
+    {
+      "id": "ig-explore-grid",
+      "name": "Hide the Explore grid (search still works)",
+      "type": "hide",
+      "routes": "^/explore/?(\\?.*)?$",
+      "selector": "main a[href^=\"/p/\"], main a[href^=\"/reel/\"]",
+      "default": true
+    },
+    {
+      "id": "ig-suggested-posts",
+      "name": "Hide suggested posts in the feed",
+      "type": "hideText",
+      "routes": "^/(\\?.*)?$",
+      "container": "article",
+      "text": ["Suggested for you", "Suggested posts"],
+      "default": true
+    },
+    {
+      "id": "ig-feed-reels",
+      "name": "Hide reels from accounts you follow in the feed",
+      "type": "hideClosest",
+      "routes": "^/(\\?.*)?$",
+      "match": "a[href^=\"/reel/\"]",
+      "closest": "article",
+      "default": false
+    }
+  ]
+}

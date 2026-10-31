@@ -1,0 +1,4 @@
+# Keep shell scripts runnable on macOS/Linux checkouts.
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary

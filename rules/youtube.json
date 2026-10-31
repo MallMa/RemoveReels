@@ -1,0 +1,61 @@
+{
+  "schema": 0,
+  "platform": "youtube",
+  "name": "YouTube",
+  "version": "2026.10.31",
+  "startUrl": "https://m.youtube.com/",
+  "homePath": "/",
+  "origins": ["https://m.youtube.com", "https://www.youtube.com"],
+  "hosts": ["youtube.com", "youtu.be", "google.com"],
+  "rules": [
+    {
+      "id": "yt-shorts-redirect",
+      "name": "Open Shorts as normal videos (no swiping)",
+      "type": "route",
+      "match": "^/shorts/([A-Za-z0-9_-]+)",
+      "action": "redirect",
+      "to": "/watch?v=$1",
+      "default": true
+    },
+    {
+      "id": "yt-shorts-tab",
+      "name": "Hide the Shorts tab",
+      "type": "hide",
+      "selector": "ytm-pivot-bar-item-renderer:has(.pivot-shorts)",
+      "canary": true,
+      "canaryWhen": "ytm-pivot-bar-renderer",
+      "default": true
+    },
+    {
+      "id": "yt-shorts-cards",
+      "name": "Hide Shorts in search results and lists",
+      "type": "hideClosest",
+      "match": "a[href^=\"/shorts/\"]",
+      "closest": "ytm-video-with-context-renderer, ytm-reel-item-renderer, ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2, ytm-rich-item-renderer, ytm-compact-video-renderer",
+      "default": true
+    },
+    {
+      "id": "yt-shorts-shelves",
+      "name": "Hide Shorts shelves",
+      "type": "hide",
+      "selector": "ytm-reel-shelf-renderer, ytm-rich-section-renderer:has(ytm-reel-shelf-renderer), ytm-rich-section-renderer:has(a[href^=\"/shorts/\"]), grid-shelf-view-model:has(a[href^=\"/shorts/\"])",
+      "default": true
+    },
+    {
+      "id": "yt-home-feed",
+      "name": "Hide recommended videos on the home page",
+      "type": "hide",
+      "routes": "^/(\\?.*)?$",
+      "selector": "ytm-browse ytm-rich-grid-renderer",
+      "default": true
+    },
+    {
+      "id": "yt-watch-next",
+      "name": "Hide recommended videos under the player",
+      "type": "hide",
+      "routes": "^/watch",
+      "selector": "ytm-single-column-watch-next-results-renderer ytm-video-with-context-renderer, ytm-single-column-watch-next-results-renderer ytm-compact-video-renderer, ytm-single-column-watch-next-results-renderer ytm-reel-shelf-renderer",
+      "default": true
+    }
+  ]
+}
