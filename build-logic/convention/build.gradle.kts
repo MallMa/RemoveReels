@@ -4,13 +4,14 @@ plugins {
 
 dependencies {
     compileOnly(libs.android.gradlePlugin)
+    compileOnly(libs.detekt.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
 }
 
 gradlePlugin {
     plugins {
         register("androidApplication") {
-            id = libs.plugins.removereels.android.application.get().pluginId
+            id = "removereels.android.application"
             implementationClass = "io.github.mallma.removereels.buildlogic.AndroidApplicationConventionPlugin"
         }
     }

@@ -1,0 +1,24 @@
+# Only the differences from detekt's default configuration, which the build uses as the base.
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - 'Composable'
+
+style:
+  ForbiddenMethodCall:
+    active: true
+    methods:
+      - reason: 'Inject a java.time.Clock or kotlin.time.TimeSource so time stays testable.'
+        value: 'java.lang.System.currentTimeMillis'
+      - reason: 'Inject a java.time.Clock or kotlin.time.TimeSource so time stays testable.'
+        value: 'java.lang.System.nanoTime'
+      - reason: 'Suspend with kotlinx.coroutines.delay instead of blocking a thread.'
+        value: 'java.lang.Thread.sleep'
+      - reason: 'Console output goes nowhere on Android.'
+        value: 'kotlin.io.print'
+      - reason: 'Console output goes nowhere on Android.'
+        value: 'kotlin.io.println'
+  MagicNumber:
+    ignoreAnnotated:
+      - 'Composable'

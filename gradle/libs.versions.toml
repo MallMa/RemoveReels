@@ -1,6 +1,10 @@
 [versions]
 agp = "9.4.1"
 kotlin = "2.4.21"
+# 2.0 is still an alpha, but detekt 1.x does not support Kotlin 2.4.
+detekt = "2.0.0-alpha.6"
+ktlint = "1.8.0"
+spotless = "8.10.4"
 
 androidCompileSdk = "37"
 androidTargetSdk = "37"
@@ -26,11 +30,14 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 
 # Used by build-logic
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
 # Convention plugins from build-logic
 removereels-android-application = { id = "removereels.android.application" }

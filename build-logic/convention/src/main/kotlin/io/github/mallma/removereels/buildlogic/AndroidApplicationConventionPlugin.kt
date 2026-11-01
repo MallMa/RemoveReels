@@ -5,7 +5,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 
-/** Android app module: SDK levels, Java and Kotlin targets, Compose, release shrinking and unit test resources. */
+/** Android app module: SDK levels, Java and Kotlin targets, Compose, release shrinking, tests, Lint and detekt. */
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
@@ -39,9 +39,16 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         test.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
                     }
                 }
+                lint {
+                    warningsAsErrors = true
+                    abortOnError = true
+                    // Newer versions arrive as Dependabot pull requests instead of failing the build.
+                    disable += setOf("AndroidGradlePluginVersion", "GradleDependency")
+                }
             }
 
             configureKotlin()
+            configureDetekt()
         }
     }
 }
