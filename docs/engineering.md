@@ -15,9 +15,11 @@ without anyone having to remember it.
 
 ## Toolchain
 
-- JDK 21, Kotlin, Android Gradle Plugin and Gradle at the latest stable versions when M0 starts.
+- JDK 21, Gradle 9.8, Android Gradle Plugin 9.4 and Kotlin 2.4: the latest stable versions when M0 started.
 - All versions in `gradle/libs.versions.toml`; no versions in build scripts.
-- Gradle dependency verification (`gradle/verification-metadata.xml`) pins the checksum of every dependency.
+- Shared build configuration lives in convention plugins in `build-logic`.
+- The Gradle wrapper pins the SHA-256 checksum of its distribution. Gradle dependency verification is not used
+  ([ADR 0006](adr/0006-quality-gates.md)).
 
 ## Static analysis
 
@@ -25,10 +27,10 @@ All checks run in CI, all must pass, and none has a baseline: the project starts
 
 | Tool | What it checks | Setting |
 |---|---|---|
-| Kotlin compiler | Types, nullability, unused code | `allWarningsAsErrors = true`; `explicitApi()` in `:detection` and `:budget` |
+| Kotlin compiler | Types, nullability, deprecated APIs | `allWarningsAsErrors = true`; `explicitApi()` in `:detection` and `:budget` |
 | ktlint via Spotless | Formatting of Kotlin and Gradle scripts; trailing whitespace and final newlines elsewhere | `./gradlew spotlessApply` fixes everything it reports |
-| detekt | Complexity, naming, likely bugs, forbidden calls (`System.currentTimeMillis`, `Thread.sleep`, `println`) | `config/detekt/detekt.yml` |
-| Android Lint | Android-specific problems, accessibility of our own UI | `warningsAsErrors = true`; `GradleDependency` disabled because Dependabot handles updates |
+| detekt 2.0 (type resolution) | Complexity, naming, unused code, likely bugs, forbidden calls (`System.currentTimeMillis`, `Thread.sleep`, `println`) | Defaults plus `config/detekt/detekt.yml` |
+| Android Lint | Android-specific problems, accessibility of our own UI | `warningsAsErrors = true`; the "newer version available" checks are disabled because Dependabot handles updates |
 | Gradle wrapper validation | The wrapper jar is the official one | GitHub Action |
 
 ## Tests
@@ -63,13 +65,11 @@ All checks run in CI, all must pass, and none has a baseline: the project starts
 One GitHub Actions workflow runs on every pull request and every push to `main`:
 
 1. Validate the Gradle wrapper.
-2. `spotlessCheck`
-3. `detekt`
-4. `lint`
-5. Unit tests and `koverVerify`
-6. `assembleRelease`
+2. `./gradlew check`: formatting, detekt, Lint, unit tests and the forbidden-permission check, plus Kover once the
+   pure modules exist.
+3. `./gradlew assembleRelease`, which also runs R8.
 
-Actions are pinned to commit SHAs. Dependabot opens grouped weekly updates for Gradle dependencies and Actions.
+Running `./gradlew check` locally gives the same result as CI. Actions are pinned to commit SHAs. Dependabot opens grouped weekly updates for Gradle dependencies and Actions.
 
 ## Releases
 
