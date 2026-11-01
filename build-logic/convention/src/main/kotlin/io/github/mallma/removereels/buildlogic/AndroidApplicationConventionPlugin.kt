@@ -5,7 +5,10 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 
-/** Android app module: SDK levels, Java and Kotlin targets, Compose, release shrinking, tests, Lint and detekt. */
+/**
+ * Android app module: SDK levels, Java and Kotlin targets, Compose, release shrinking, tests, Lint, detekt and the
+ * forbidden-permission check.
+ */
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
@@ -49,6 +52,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             configureKotlin()
             configureDetekt()
+            configureManifestPermissionCheck()
         }
     }
 }
