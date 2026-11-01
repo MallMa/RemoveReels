@@ -65,13 +65,11 @@ All checks run in CI, all must pass, and none has a baseline: the project starts
 One GitHub Actions workflow runs on every pull request and every push to `main`:
 
 1. Validate the Gradle wrapper.
-2. `spotlessCheck`
-3. `detekt`
-4. `lint`
-5. Unit tests and `koverVerify`
-6. `assembleRelease`
+2. `./gradlew check`: formatting, detekt, Lint, unit tests and the forbidden-permission check, plus Kover once the
+   pure modules exist.
+3. `./gradlew assembleRelease`, which also runs R8.
 
-Actions are pinned to commit SHAs. Dependabot opens grouped weekly updates for Gradle dependencies and Actions.
+Running `./gradlew check` locally gives the same result as CI. Actions are pinned to commit SHAs. Dependabot opens grouped weekly updates for Gradle dependencies and Actions.
 
 ## Releases
 

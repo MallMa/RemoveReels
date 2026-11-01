@@ -96,7 +96,7 @@ stale, and RemoveReels says so instead of failing silently.
 | Dependency injection | A small hand-written `AppContainer` | About a dozen objects; manual wiring is explicit and has no build cost. | Hilt, Koin. |
 | Navigation | Navigation Compose with type-safe routes | Standard, small. | Hand-rolled. |
 | Time | `java.time.Clock` (wall time) and `kotlin.time.TimeSource` (monotonic), both injected | Correct midnights and time zones; sessions immune to clock changes; deterministic tests. | `System.currentTimeMillis()`. |
-| SDK levels | minSdk 33, target/compile 36 | Android 13+ removes compatibility branches (node recycling, notification permission checks, install-source API, per-app language). Lowered only if the author's phone needs it. | minSdk 26 (more legacy code paths for users the project does not target). |
+| SDK levels | minSdk 33, target/compile 37 (Android 17) | Android 13+ removes compatibility branches (node recycling, notification permission checks, install-source API, per-app language). Lowered only if the author's phone needs it. | minSdk 26 (more legacy code paths for users the project does not target). |
 | Permissions | Accessibility binding, `POST_NOTIFICATIONS`, `<queries>` for the two packages. **No `INTERNET`.** | An app that can see screens should be unable to send anything; Android enforces it. | |
 | Distribution | Release APK on GitHub Releases, installed with `adb` or Android Studio | Personal use; no store review. | Google Play, F-Droid. |
 
@@ -115,7 +115,8 @@ stale, and RemoveReels says so instead of failing silently.
 | `:app` | Accessibility service and `ScreenTree` adapter, enforcer, overlays, DataStore, WorkManager, Compose UI, `AppContainer` | both modules |
 
 The two pure modules cannot import Android classes, which the build enforces. All decisions live there and are tested
-on the JVM in milliseconds; `:app` translates between Android and those modules.
+on the JVM in milliseconds; `:app` translates between Android and those modules. Each pure module is created together
+with its first code, in M1 and M2. Shared build settings live in convention plugins in `build-logic`.
 
 Core model (`:budget`):
 
@@ -330,7 +331,7 @@ Each milestone is a series of small pull requests; see [engineering.md](engineer
 
 | Milestone | Scope | Done when |
 |---|---|---|
-| M0 Foundation | Gradle project with the three modules, version catalog, formatting, detekt, Android Lint, Kover, CI, ADRs | An empty app builds and every check runs green in CI |
+| M0 Foundation | Gradle project with build conventions and the app module, version catalog, formatting, detekt, Android Lint, the no-internet check, CI, ADRs | An empty app builds and every check runs green in CI |
 | M1 Detection | Record screens from the phone, sanitise them into fixtures, rule format, `SurfaceDetector`, a logging-only service | A day of normal use logs every entry point with no false hits |
 | M2 Budget | Allowances, schedule, ledger, `BlockPolicy`, time handling | Every rule in section 2 has tests |
 | M3 Enforcement | Audio focus, block card, back-out sequence, timer pill, usage recording | Every entry point is blocked within the speed target |
