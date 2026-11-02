@@ -54,11 +54,12 @@ All checks run in CI, all must pass, and none has a baseline: the project starts
 
 ## Branches and pull requests
 
-- `main` is always releasable. It is protected: pull request required, all CI checks required, linear history.
+- `main` is always releasable. It is protected: pull request required, all CI checks required.
 - Work happens on short-lived branches named `feat/…`, `fix/…`, `docs/…`.
 - One pull request per task. The description says what changed, why, and how it was verified (with a screenshot for
   UI changes).
-- Pull requests are squash-merged with a Conventional Commits title, so `main` has one commit per change.
+- Pull requests are merged with a merge commit, not squashed, so the branch's commits reach `main` unchanged and
+  stay grouped under a merge that carries the pull request's title.
 
 ## CI
 
