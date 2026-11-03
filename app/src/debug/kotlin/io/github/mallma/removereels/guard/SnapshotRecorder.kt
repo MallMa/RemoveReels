@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import io.github.mallma.removereels.detection.ScreenSnapshot
 import io.github.mallma.removereels.detection.SnapshotNode
+import io.github.mallma.removereels.targetAppOf
 import java.io.File
 
 /**
@@ -35,7 +36,12 @@ internal class SnapshotRecorder(
                 val root = service.rootInActiveWindow
                 when {
                     !name.matches(SAFE_NAME) -> Log.w(TAG, "Snapshot name must match $SAFE_NAME: '$name'")
+
                     root == null -> Log.w(TAG, "No active window to record")
+
+                    // Other apps are none of RemoveReels' business, and their versions are not visible to it.
+                    targetAppOf(root.packageName) == null -> Log.w(TAG, "Records only Instagram and YouTube")
+
                     else -> save(name, root)
                 }
             }
@@ -79,23 +85,24 @@ internal class SnapshotRecorder(
         Log.i(TAG, "Saved ${nodes.size} views of $packageName ${snapshot.appVersion} to $file")
     }
 
-    /** Depth first, keeping views that have an id; text and descriptions are never read. */
+    /** Depth first, with each view's parent; text and descriptions are never read. */
     private fun collect(
         node: AccessibilityNodeInfo,
         into: MutableList<SnapshotNode>,
+        parent: Int? = null,
     ) {
-        node.viewIdResourceName?.let { viewId ->
-            into +=
-                SnapshotNode(
-                    viewId,
-                    node.className?.toString().orEmpty(),
-                    node.boundsInScreen(),
-                    node.isVisibleToUser,
-                    node.isSelected,
-                )
-        }
-        for (index in 0 until node.childCount) {
-            node.getChild(index)?.let { collect(it, into) }
+        val index = into.size
+        into +=
+            SnapshotNode(
+                viewId = node.viewIdResourceName,
+                className = node.className?.toString().orEmpty(),
+                bounds = node.boundsInScreen(),
+                visible = node.isVisibleToUser,
+                selected = node.isSelected,
+                parent = parent,
+            )
+        for (child in 0 until node.childCount) {
+            node.getChild(child)?.let { collect(it, into, index) }
         }
     }
 

@@ -20,7 +20,8 @@ published on Google Play.
 **Non-goals for the MVP**
 
 - Other apps (Instagram Lite, Facebook, TikTok) and other platforms (iOS, web).
-- Hiding Reels and Shorts previews inside feeds. They stay visible; opening one is blocked.
+- Hiding Reels and Shorts previews inside feeds. They stay visible; opening one is blocked. This is the next feature
+  after the MVP; see [hiding-plan.md](hiding-plan.md).
 - Statistics, streaks, schedules, translations.
 
 ## 2. Product rules

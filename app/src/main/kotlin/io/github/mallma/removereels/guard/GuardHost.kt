@@ -2,7 +2,6 @@ package io.github.mallma.removereels.guard
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
-import android.os.PowerManager
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import io.github.mallma.removereels.AppContainer
@@ -10,14 +9,15 @@ import io.github.mallma.removereels.MainActivity
 import io.github.mallma.removereels.budget.BlockReason
 import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.budget.WatchTimer
+import io.github.mallma.removereels.detection.EntryPoint
 import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.guard.overlay.BlockCard
 import io.github.mallma.removereels.guard.overlay.BlockNotice
+import io.github.mallma.removereels.guard.overlay.EntryPointCovers
 import io.github.mallma.removereels.guard.overlay.OverlayWindow
 import io.github.mallma.removereels.guard.overlay.TimerPill
 import io.github.mallma.removereels.packageName
 import io.github.mallma.removereels.storage.AppState
-import io.github.mallma.removereels.targetAppOf
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,13 +41,14 @@ internal class GuardHost(
     private val clock = container.clock
     private val store = container.stateStore
     private val status = container.guardStatus
-    private val power = service.getSystemService(PowerManager::class.java)
+    private val screenReader = ScreenReader(service, detector)
     private val audioFocus = AudioFocus(service)
     private val blockCard = OverlayWindow(service, OverlayWindow.fullScreen())
     private val timerPill = OverlayWindow(service, OverlayWindow.topCentre())
+    private val covers = EntryPointCovers(service)
     private val timeLeft = mutableStateOf(Duration.ZERO)
     private var timerHiddenByUser = false
-    private val backOut = BackOut(ServiceNavigation(service) { readScreen()?.surface != null }, BACK_OUT_SETTLE)
+    private val backOut = BackOut(ServiceNavigation(service, screenReader::isOnSurface), BACK_OUT_SETTLE)
     private val guard =
         Guard(container.clock, container.automaticTime, container.stateStore, WatchTimer(container.timeSource), this)
     private val checks =
@@ -55,7 +56,7 @@ internal class GuardHost(
             timeSource = container.timeSource,
             spacing = CHECK_SPACING,
             tick = WATCH_TICK,
-            ticking = { guard.isWatching },
+            ticking = { guard.isWatching || guard.isCovering },
             check = ::checkScreen,
         )
     private val scope = MainScope()
@@ -73,6 +74,7 @@ internal class GuardHost(
         scope.cancel()
         blockCard.destroy()
         timerPill.destroy()
+        covers.hide()
         audioFocus.release()
     }
 
@@ -117,8 +119,10 @@ internal class GuardHost(
 
     override fun surfaceGone() = audioFocus.release()
 
+    override fun cover(entryPoints: List<EntryPoint>) = covers.show(entryPoints)
+
     private suspend fun checkScreen() {
-        val screen = readScreen()
+        val screen = screenReader.read()
         try {
             guard.check(screen)
         } catch (e: IOException) {
@@ -138,18 +142,6 @@ internal class GuardHost(
             Intent(service, MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
         )
-    }
-
-    /** Null while the screen is off or neither app is in front. */
-    private fun readScreen(): Screen? {
-        val root = service.rootInActiveWindow?.takeIf { power.isInteractive }
-        val app = targetAppOf(root?.packageName)
-        return if (root == null || app == null) {
-            null
-        } else {
-            val tree = AccessibilityScreenTree(root)
-            Screen(app, detector.findSurface(app.packageName, tree), detector.checkCanary(app.packageName, tree))
-        }
     }
 
     private companion object {
