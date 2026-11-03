@@ -1,23 +1,17 @@
 package io.github.mallma.removereels.ui
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import io.github.mallma.removereels.R
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import io.github.mallma.removereels.ui.home.HomeRoute
 
-/** Root of the app's user interface. */
+/** The app's screens and how they lead to each other. */
 @Composable
 fun RemoveReelsApp(modifier: Modifier = Modifier) {
-    Scaffold(modifier = modifier) { contentPadding ->
-        Text(
-            text = stringResource(R.string.app_name),
-            modifier = Modifier.padding(contentPadding).padding(16.dp),
-            style = MaterialTheme.typography.headlineMedium,
-        )
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = Route.Home, modifier = modifier) {
+        composable<Route.Home> { HomeRoute() }
     }
 }

@@ -3,8 +3,10 @@ package io.github.mallma.removereels
 import android.content.Context
 import android.provider.Settings
 import androidx.datastore.dataStoreFile
+import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.detection.BundledRules
 import io.github.mallma.removereels.detection.SurfaceDetector
+import io.github.mallma.removereels.guard.GuardStatus
 import io.github.mallma.removereels.storage.StateStore
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +30,17 @@ internal class AppContainer(
     val detector = SurfaceDetector(BundledRules.load())
     val automaticTime =
         AutomaticTime { Settings.Global.getInt(context.contentResolver, Settings.Global.AUTO_TIME, 0) == 1 }
+    val guardStatus = GuardStatus()
+    val installedApps =
+        InstalledApps { app ->
+            context.packageManager.packageInfoOf(app)?.let { it.versionName.orEmpty() }
+        }
+}
+
+/** Which of the target apps are installed; needs the `<queries>` entries in the manifest. */
+internal fun interface InstalledApps {
+    /** The installed version of [app], or null if it is not installed. */
+    fun versionOf(app: TargetApp): String?
 }
 
 /** Whether Android sets the date and time from the network, which allowances need (ADR 0003). */

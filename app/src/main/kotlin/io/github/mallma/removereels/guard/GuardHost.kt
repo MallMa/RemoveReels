@@ -30,6 +30,7 @@ internal class GuardHost(
     container: AppContainer,
 ) : GuardActions {
     private val detector = container.detector
+    private val status = container.guardStatus
     private val power = service.getSystemService(PowerManager::class.java)
     private val audioFocus = AudioFocus(service)
     private val blockCard = OverlayWindow(service, OverlayWindow.fullScreen())
@@ -92,6 +93,7 @@ internal class GuardHost(
         reason: BlockReason,
     ) {
         audioFocus.hold()
+        status.blocked()
         blockCard.show { BlockCard(BlockNotice(app, reason, surface.openedFromMessages), onContinue = blockCard::hide) }
         val rules = detector.rulesFor(app.packageName)
         backOut.leave(rules?.homeTabViewId?.let(rules::fullViewId))

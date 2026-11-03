@@ -15,6 +15,7 @@ class BlockingService : AccessibilityService() {
     override fun onServiceConnected() {
         host = GuardHost(this, container).also { it.start() }
         recorder.start()
+        container.guardStatus.serviceConnected()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -24,6 +25,7 @@ class BlockingService : AccessibilityService() {
     override fun onInterrupt() = Unit
 
     override fun onDestroy() {
+        container.guardStatus.serviceDisconnected()
         recorder.stop()
         host?.stop()
         host = null

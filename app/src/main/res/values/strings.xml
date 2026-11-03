@@ -2,6 +2,26 @@
 <resources>
     <string name="app_name">RemoveReels</string>
     <string name="service_description">Blocks Reels in Instagram and Shorts in YouTube. Everything else in both apps keeps working. RemoveReels only looks at those two apps, saves nothing you see or type, and has no internet access.</string>
+    <string name="app_instagram">Instagram</string>
+    <string name="app_youtube">YouTube</string>
+    <string name="surface_instagram">Reels</string>
+    <string name="surface_youtube">Shorts</string>
+
+    <!-- Home -->
+    <string name="home_blocking_on">Blocking is on</string>
+    <string name="home_blocking_off">Blocking is off</string>
+    <string name="home_turn_on">Turn on</string>
+    <string name="home_open_date_settings">Open date and time settings</string>
+    <string name="home_not_installed">Not installed</string>
+    <!-- For example "Reels: blocked" -->
+    <string name="home_surface_blocked">%1$s: blocked</string>
+    <string name="home_surface_used_up">%1$s: used up today</string>
+    <!-- For example "Shorts: 7 of 15 min left" -->
+    <string name="home_surface_left">%1$s: %2$d of %3$d min left</string>
+    <string name="home_from_tomorrow_minutes">From tomorrow: %1$d min</string>
+    <string name="home_from_tomorrow_blocked">From tomorrow: blocked</string>
+    <string name="home_rules_stale">This app may have changed. Some of its screens may not be blocked until RemoveReels is updated.</string>
+    <string name="home_today_total">Today: %1$d of %2$d min · resets at midnight</string>
 
     <!-- Block card -->
     <string name="block_title_instagram">Reels are blocked</string>
