@@ -1,6 +1,6 @@
 # RemoveReels: MVP plan
 
-Status: planning · Last updated: 2026-11-01
+Status: M0 to M4 done, M5 next · Last updated: 2026-11-03
 
 ## 1. Product
 
@@ -130,8 +130,9 @@ Core model (`:budget`):
 - `Allowance`: blocked, or 5–45 minutes in steps of 5.
 - `Allowances`: one per app; construction fails if the sum exceeds 45 minutes.
 - `AllowanceSchedule`: today's allowances plus an optional change effective from a given date. `scheduleChange(new, today)` always sets the effective date to `today + 1`.
-- `UsageLedger`: seconds watched per app per date; keeps seven days.
-- `BlockPolicy.decide(app, now, schedule, ledger, autoTimeOn)` → `Allow(remaining)` or `Block(reason)`.
+- `UsageLedger`: time watched per app per date; keeps seven days.
+- `BlockPolicy.decide(app, today, schedule, ledger, automaticTimeOn)` → `Allow(remaining)` or `Block(reason)`.
+- `WatchTimer`: measures watching time on a monotonic clock, so changing the wall clock adds or removes nothing.
 
 ## 6. UI/UX
 
@@ -191,7 +192,7 @@ Turn on                          Try it
 
 - **Welcome** states the no-off-switch rule up front, so it is a choice, not a surprise.
 - **Notifications** asks for the notification permission and explains its single use: telling you when blocking is off.
-- **Turn on** opens our entry in Accessibility settings. If the APK was installed from a downloaded file, Android 13+
+- **Turn on** opens Android's Accessibility settings; apps cannot open their own entry there directly. If the APK was installed from a downloaded file, Android 13+
   greys out the switch ("restricted setting"); the app detects the install source and shows the extra step first:
   App info → ⋮ → Allow restricted settings.
 - **Phone maker** appears only on brands known to stop background services (Xiaomi, Oppo, Vivo, Huawei, Samsung) and
@@ -312,7 +313,8 @@ About                           ›   version, source code, licences,
                                     tested app versions (Instagram 4xx ✓)
 ```
 
-Debug builds add a **Detection log**: the last detections and canary results with view ids only, used to fix rules.
+Debug builds can record the current screen through adb (`SnapshotRecorder`), with view ids, classes and bounds only,
+to update the rules and their fixtures.
 
 ### Notification
 
@@ -334,7 +336,8 @@ accessibility service is off; it opens the *Turn on* screen.
 
 ## 8. Milestones
 
-Each milestone is a series of small pull requests; see [engineering.md](engineering.md).
+Each milestone is a series of small commits; see [engineering.md](engineering.md). M1 to M4 landed together in one
+pull request.
 
 | Milestone | Scope | Done when |
 |---|---|---|
@@ -345,7 +348,9 @@ Each milestone is a series of small pull requests; see [engineering.md](engineer
 | M4 Interface | Onboarding, Home, Daily allowance, Settings, notification | Install to "it works" in under two minutes |
 | M5 Release | Device checks, battery, accessibility pass, README screenshots, v1.0.0 | Every row in section 7 passes |
 
-M1 needs the phone connected over USB with Instagram and YouTube installed.
+M1 to M4 were checked on the author's phone: every recorded entry point is detected, the Reels and Shorts tabs are
+blocked, the timer pill counts down, and onboarding runs to a working block. Two "done when" targets are measured in
+M5 with the other device checks: a day of normal use without false hits, and the speed target.
 
 ## 9. Risks
 
