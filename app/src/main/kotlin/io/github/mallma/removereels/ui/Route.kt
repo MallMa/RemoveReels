@@ -9,4 +9,16 @@ internal sealed interface Route {
 
     @Serializable
     data object Allowance : Route
+
+    @Serializable
+    data object Settings : Route
+
+    @Serializable
+    data object TestBlocking : Route
+
+    @Serializable
+    data object KeepRunning : Route
+
+    @Serializable
+    data object About : Route
 }

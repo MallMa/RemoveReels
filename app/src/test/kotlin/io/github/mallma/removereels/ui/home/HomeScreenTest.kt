@@ -37,7 +37,13 @@ class HomeScreenTest {
         onTurnOn: () -> Unit = {},
         onOpenAllowance: () -> Unit = {},
     ) = compose.setContent {
-        HomeScreen(state, onTurnOn = onTurnOn, onOpenDateSettings = {}, onOpenAllowance = onOpenAllowance)
+        HomeScreen(
+            state,
+            onTurnOn = onTurnOn,
+            onOpenDateSettings = {},
+            onOpenAllowance = onOpenAllowance,
+            onOpenSettings = {},
+        )
     }
 
     @Test

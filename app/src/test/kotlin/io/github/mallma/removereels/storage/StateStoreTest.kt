@@ -42,6 +42,16 @@ class StateStoreTest {
         }
 
     @Test
+    fun `the time left shows until it is switched off`() =
+        runTest {
+            assertThat(store.state.first().showTimeLeft).isTrue()
+
+            store.setShowTimeLeft(false)
+
+            assertThat(store.state.first().showTimeLeft).isFalse()
+        }
+
+    @Test
     fun `recorded usage adds up`() =
         runTest {
             store.recordUsage(TargetApp.YOUTUBE, today, 3.seconds)

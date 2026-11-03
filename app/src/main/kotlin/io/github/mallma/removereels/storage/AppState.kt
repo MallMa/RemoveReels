@@ -10,6 +10,8 @@ internal data class AppState(
     val usage: UsageLedger,
     /** Apps whose canary failed: their rules may no longer fit the installed version. */
     val staleRules: Set<TargetApp> = emptySet(),
+    /** Whether the timer pill shows while watching within an allowance. */
+    val showTimeLeft: Boolean = true,
 ) {
     companion object {
         val INITIAL = AppState(AllowanceSchedule.INITIAL, UsageLedger())

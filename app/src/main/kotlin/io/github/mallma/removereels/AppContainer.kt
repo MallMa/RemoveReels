@@ -1,6 +1,7 @@
 package io.github.mallma.removereels
 
 import android.content.Context
+import android.content.pm.PackageManager.PackageInfoFlags
 import android.provider.Settings
 import androidx.datastore.dataStoreFile
 import io.github.mallma.removereels.budget.TargetApp
@@ -31,6 +32,11 @@ internal class AppContainer(
     val automaticTime =
         AutomaticTime { Settings.Global.getInt(context.contentResolver, Settings.Global.AUTO_TIME, 0) == 1 }
     val guardStatus = GuardStatus()
+    val appVersion: String =
+        context.packageManager
+            .getPackageInfo(context.packageName, PackageInfoFlags.of(0))
+            .versionName
+            .orEmpty()
     val installedApps =
         InstalledApps { app ->
             context.packageManager.packageInfoOf(app)?.let { it.versionName.orEmpty() }

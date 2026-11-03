@@ -27,6 +27,7 @@ internal data class StoredState(
     val schedule: StoredSchedule = StoredSchedule(),
     val usage: List<StoredDay> = emptyList(),
     val staleRules: List<String> = emptyList(),
+    val showTimeLeft: Boolean = true,
 ) {
     companion object {
         const val CURRENT_VERSION = 1
@@ -74,6 +75,7 @@ internal fun StoredState.toAppState(): AppState =
             ),
         usage = UsageLedger(usage.associate { it.date to it.toUsage() }),
         staleRules = TargetApp.entries.filter { it.storedName in staleRules }.toSet(),
+        showTimeLeft = showTimeLeft,
     )
 
 internal fun AppState.toStoredState(): StoredState =
@@ -92,6 +94,7 @@ internal fun AppState.toStoredState(): StoredState =
                 )
             },
         staleRules = staleRules.map { it.storedName }.sorted(),
+        showTimeLeft = showTimeLeft,
     )
 
 /** How an app is named in stored files; independent of the enum's Kotlin name. */

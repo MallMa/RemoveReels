@@ -41,6 +41,10 @@ internal class StateStore(
         dataStore.updateData { it.copy(staleRules = if (stale) it.staleRules + app else it.staleRules - app) }
     }
 
+    suspend fun setShowTimeLeft(show: Boolean) {
+        dataStore.updateData { it.copy(showTimeLeft = show) }
+    }
+
     companion object {
         /** A store in [file]. A corrupt file is replaced by [AppState.INITIAL], which never loosens the rules. */
         fun create(

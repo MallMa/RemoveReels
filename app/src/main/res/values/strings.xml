@@ -24,6 +24,66 @@
     <string name="home_today_total">Today: %1$d of %2$d min · resets at midnight</string>
     <string name="home_daily_allowance">Daily allowance</string>
 
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_show_time_left">Show time left while watching</string>
+    <string name="settings_show_time_left_detail">A small timer at the top of the screen while you use an allowance.</string>
+    <string name="settings_test_blocking">Test blocking</string>
+    <string name="settings_keep_running">Keep running on this phone</string>
+    <string name="settings_about">About</string>
+
+    <!-- About -->
+    <string name="about_version">RemoveReels %1$s</string>
+    <string name="about_privacy">RemoveReels only looks at Instagram and YouTube, saves nothing you see or type, and has no internet access.</string>
+    <string name="about_source">Source code</string>
+    <string name="about_license">MIT License</string>
+    <string name="about_libraries">Built with open-source libraries from Android Jetpack and Kotlin, under the Apache License 2.0.</string>
+    <string name="about_tested_versions">Tested app versions</string>
+    <string name="about_tested_with">Rules tested with version %1$s</string>
+    <string name="about_installed_same">Installed: %1$s ✓</string>
+    <string name="about_installed_other">Installed: %1$s, not tested yet</string>
+
+    <!-- Keep running -->
+    <string name="keep_running_intro">Some phones stop apps in the background to save battery, which would also stop blocking. These steps keep RemoveReels running:</string>
+    <!-- A numbered step, for example "1. Open Settings" -->
+    <string name="keep_running_step">%1$d. %2$s</string>
+    <string name="keep_running_open_app_settings">Open RemoveReels in app settings</string>
+    <string-array name="keep_running_samsung">
+        <item>Open Settings → Apps → RemoveReels → Battery and choose Unrestricted.</item>
+        <item>Open Settings → Battery → Background usage limits and make sure RemoveReels is not under Sleeping apps or Deep sleeping apps.</item>
+    </string-array>
+    <string-array name="keep_running_xiaomi">
+        <item>Open Settings → Apps → Manage apps → RemoveReels and turn on Autostart.</item>
+        <item>On the same screen, open Battery saver and choose No restrictions.</item>
+    </string-array>
+    <string-array name="keep_running_oppo">
+        <item>Open Settings → Apps → RemoveReels → Battery and allow background activity.</item>
+        <item>Turn off battery optimisation for RemoveReels.</item>
+    </string-array>
+    <string-array name="keep_running_vivo">
+        <item>Open Settings → Battery → Background power consumption management and allow RemoveReels to run in the background.</item>
+        <item>Open i Manager → App manager → Autostart manager and turn on RemoveReels.</item>
+    </string-array>
+    <string-array name="keep_running_huawei">
+        <item>Open Settings → Battery → App launch, find RemoveReels and switch it to Manage manually.</item>
+        <item>Turn on Auto-launch, Secondary launch and Run in background.</item>
+    </string-array>
+    <string-array name="keep_running_other">
+        <item>Open Settings → Apps → RemoveReels → Battery and choose Unrestricted or Not optimised.</item>
+    </string-array>
+
+    <!-- Try it -->
+    <string name="try_it_title">Check that it works</string>
+    <string name="try_it_instagram">Open Instagram and tap the Reels button.</string>
+    <string name="try_it_youtube">Open YouTube and tap Shorts.</string>
+    <string name="try_it_open_instagram">Open Instagram</string>
+    <string name="try_it_open_youtube">Open YouTube</string>
+    <string name="try_it_skip">Skip</string>
+    <string name="try_it_done">Done</string>
+    <string name="try_it_worked">✓ It works. Your feed and messages are untouched.</string>
+    <string name="try_it_turn_on_first">Blocking is off, so there is nothing to test yet. Turn it on first.</string>
+    <string name="try_it_no_app">Neither Instagram nor YouTube is installed, so there is nothing to test.</string>
+
     <!-- Daily allowance -->
     <string name="navigate_back">Back</string>
     <string name="allowance_title">Daily allowance</string>

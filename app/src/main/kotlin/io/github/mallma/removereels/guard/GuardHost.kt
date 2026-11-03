@@ -13,9 +13,12 @@ import io.github.mallma.removereels.guard.overlay.BlockNotice
 import io.github.mallma.removereels.guard.overlay.OverlayWindow
 import io.github.mallma.removereels.guard.overlay.TimerPill
 import io.github.mallma.removereels.packageName
+import io.github.mallma.removereels.storage.AppState
 import io.github.mallma.removereels.targetAppOf
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -49,6 +52,7 @@ internal class GuardHost(
             check = { guard.check(readScreen()) },
         )
     private val scope = MainScope()
+    private val state = container.stateStore.state.stateIn(scope, SharingStarted.Eagerly, AppState.INITIAL)
 
     fun start() {
         scope.launch { checks.run() }
@@ -69,7 +73,7 @@ internal class GuardHost(
         remaining: Duration,
     ) {
         timeLeft.value = remaining
-        if (!timerHiddenByUser && !timerPill.isShowing) {
+        if (state.value.showTimeLeft && !timerHiddenByUser && !timerPill.isShowing) {
             timerPill.show {
                 TimerPill(
                     remaining = timeLeft.value,
