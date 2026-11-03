@@ -1,6 +1,6 @@
 # Hiding Reels and Shorts entry points
 
-Status: H1 in progress · Last updated: 2026-11-03
+Status: H1 done, H0 next · Last updated: 2026-11-03
 
 The MVP blocks a Reels or Shorts screen once it opens. This feature goes further: the ways in, such as the Reels
 tab or a Shorts shelf, disappear from Instagram and YouTube, so they cannot be seen or tapped.
@@ -63,11 +63,21 @@ What the screens recorded for the MVP (Instagram 453, YouTube 21.38) show:
 
 | Phase | Scope | Done when |
 |---|---|---|
-| **H1 Fixed tabs** | Rule format, snapshot format 2, covers; Instagram's Reels tab and YouTube's Shorts tab | Neither tab can be seen or tapped on the phone while the app is blocked; fixture tests |
+| **H1 Fixed tabs** (done) | Rule format, snapshot format 2, covers; Instagram's Reels tab and YouTube's Shorts tab | Neither tab can be seen or tapped on the phone while the app is blocked; fixture tests |
 | H0 Spike | Moving covers on Explore tiles and the profile tab row: lag while scrolling at 120 Hz, battery, drags over covers, audio of covered videos | A recorded decision on moving covers |
 | H2 Instagram, moving | Profile Reels tab, Explore and profile grids, feed Reels, chats, carousels | Every recorded Reel is covered and no normal post is |
 | H3 YouTube, moving | Channel Shorts tab, Shorts shelves, search tiles, channel grid | The same for YouTube |
 | H4 Polish | TalkBack, landscape, split screen, large fonts; About lists what is hidden | The MVP's acceptance criteria still pass |
+
+## H1 on the phone
+
+- Both tabs disappear: each cover takes the colour of its bar (`#0C1014` for Instagram, `#0F0F0F` for YouTube in the
+  dark theme), and YouTube's 1 dp divider along the top of its bar stays visible.
+- Tapping where a tab was does nothing; no block card appears.
+- Leaving either app removes the covers: both apps send an event as they go to the background, and the guard also
+  looks again every second while covers show.
+- Not checked yet: the light theme's colours (assumed white for both bars), landscape, and the profile and channel tabs,
+  which move with scrolling and belong to H2 and H3.
 
 ## Risks
 
