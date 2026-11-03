@@ -18,7 +18,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         BlockingCheckWorker.schedule(this)
-        openTurnOn.value = intent.getBooleanExtra(EXTRA_OPEN_TURN_ON, false)
+        // A recreated activity has handled its intent already.
+        if (savedInstanceState == null) openTurnOn.value = intent.opensTurnOn()
         setContent {
             RemoveReelsTheme {
                 RemoveReelsApp(openTurnOn = openTurnOn.value, onTurnOnOpened = { openTurnOn.value = false })
@@ -28,8 +29,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        openTurnOn.value = intent.getBooleanExtra(EXTRA_OPEN_TURN_ON, false)
+        setIntent(intent)
+        openTurnOn.value = intent.opensTurnOn()
     }
+
+    /** From the notification itself, not from Recents, which replays the intent the task was started with. */
+    private fun Intent.opensTurnOn(): Boolean =
+        getBooleanExtra(EXTRA_OPEN_TURN_ON, false) && flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0
 
     internal companion object {
         const val EXTRA_OPEN_TURN_ON = "io.github.mallma.removereels.OPEN_TURN_ON"
