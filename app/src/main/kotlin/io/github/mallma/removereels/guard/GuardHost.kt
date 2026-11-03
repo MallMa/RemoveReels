@@ -2,6 +2,7 @@ package io.github.mallma.removereels.guard
 
 import android.accessibilityservice.AccessibilityService
 import android.os.PowerManager
+import androidx.compose.runtime.mutableStateOf
 import io.github.mallma.removereels.AppContainer
 import io.github.mallma.removereels.budget.BlockReason
 import io.github.mallma.removereels.budget.TargetApp
@@ -10,6 +11,7 @@ import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.guard.overlay.BlockCard
 import io.github.mallma.removereels.guard.overlay.BlockNotice
 import io.github.mallma.removereels.guard.overlay.OverlayWindow
+import io.github.mallma.removereels.guard.overlay.TimerPill
 import io.github.mallma.removereels.packageName
 import io.github.mallma.removereels.targetAppOf
 import kotlinx.coroutines.MainScope
@@ -21,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * Runs the [Guard] inside the accessibility service and carries out its decisions: reads the screen, pauses the
- * video, shows the block card and backs out of blocked screens.
+ * video, shows the block card and the time left, and backs out of blocked screens.
  */
 internal class GuardHost(
     private val service: AccessibilityService,
@@ -31,6 +33,9 @@ internal class GuardHost(
     private val power = service.getSystemService(PowerManager::class.java)
     private val audioFocus = AudioFocus(service)
     private val blockCard = OverlayWindow(service, OverlayWindow.fullScreen())
+    private val timerPill = OverlayWindow(service, OverlayWindow.topCentre())
+    private val timeLeft = mutableStateOf(Duration.ZERO)
+    private var timerHiddenByUser = false
     private val backOut = BackOut(ServiceNavigation(service) { readScreen()?.surface != null }, BACK_OUT_SETTLE)
     private val guard =
         Guard(container.clock, container.automaticTime, container.stateStore, WatchTimer(container.timeSource), this)
@@ -54,15 +59,32 @@ internal class GuardHost(
     fun stop() {
         scope.cancel()
         blockCard.destroy()
+        timerPill.destroy()
         audioFocus.release()
     }
 
     override fun showTimeLeft(
         app: TargetApp,
         remaining: Duration,
-    ) = Unit
+    ) {
+        timeLeft.value = remaining
+        if (!timerHiddenByUser && !timerPill.isShowing) {
+            timerPill.show {
+                TimerPill(
+                    remaining = timeLeft.value,
+                    onHide = {
+                        timerHiddenByUser = true
+                        timerPill.hide()
+                    },
+                )
+            }
+        }
+    }
 
-    override fun hideTimeLeft() = Unit
+    override fun hideTimeLeft() {
+        timerPill.hide()
+        timerHiddenByUser = false
+    }
 
     override suspend fun block(
         app: TargetApp,

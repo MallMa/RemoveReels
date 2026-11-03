@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A stopwatch: a dial with a crown on top and one hand. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M12,6a7.5,7.5 0,1 1,0 15a7.5,7.5 0,1 1,0 -15z M12,13.5v-4"
+        android:strokeWidth="2"
+        android:strokeColor="#FF000000"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M9,2h6v2h-6z" />
+</vector>

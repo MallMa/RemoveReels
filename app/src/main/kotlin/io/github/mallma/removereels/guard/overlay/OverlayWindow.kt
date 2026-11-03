@@ -38,6 +38,8 @@ internal class OverlayWindow(
         lifecycleRegistry.currentState = Lifecycle.State.RESUMED
     }
 
+    val isShowing: Boolean get() = view != null
+
     /** Shows the window with [content], or replaces the content if it is already showing. */
     fun show(content: @Composable () -> Unit) {
         val view =
