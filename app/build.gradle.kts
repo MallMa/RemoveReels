@@ -15,6 +15,7 @@ android {
 
 dependencies {
     implementation(project(":budget"))
+    implementation(project(":detection"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
