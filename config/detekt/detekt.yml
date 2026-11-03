@@ -1,5 +1,11 @@
 # Only the differences from detekt's default configuration, which the build uses as the base.
 
+complexity:
+  LongParameterList:
+    # A screen takes its state and one callback per user action, as Compose recommends.
+    ignoreAnnotated:
+      - 'Composable'
+
 naming:
   FunctionNaming:
     ignoreAnnotated:
