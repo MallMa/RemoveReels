@@ -8,6 +8,7 @@ import io.github.mallma.removereels.budget.BlockReason
 import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.budget.UsageLedger
 import io.github.mallma.removereels.budget.WatchTimer
+import io.github.mallma.removereels.detection.CanaryResult
 import io.github.mallma.removereels.detection.Signal
 import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.storage.AppState
@@ -143,6 +144,43 @@ class GuardTest {
             guard.check(shorts)
 
             assertThat(actions.blocks).containsExactly(Block(shorts, BlockReason.AutomaticTimeOff))
+        }
+
+    @Test
+    fun `rules count as stale only after repeated stale checks`() =
+        runTest {
+            val (guard, store) = guard()
+            val staleFeed = Screen(TargetApp.INSTAGRAM, surface = null, canary = CanaryResult.STALE)
+
+            repeat(7) { guard.check(staleFeed) }
+            assertThat(store.state.first().staleRules).isEmpty()
+
+            guard.check(staleFeed)
+            assertThat(store.state.first().staleRules).containsExactly(TargetApp.INSTAGRAM)
+        }
+
+    @Test
+    fun `one healthy check clears stale rules`() =
+        runTest {
+            val (guard, store) = guard()
+            repeat(8) { guard.check(Screen(TargetApp.INSTAGRAM, surface = null, canary = CanaryResult.STALE)) }
+
+            guard.check(Screen(TargetApp.INSTAGRAM, surface = null, canary = CanaryResult.HEALTHY))
+
+            assertThat(store.state.first().staleRules).isEmpty()
+        }
+
+    @Test
+    fun `a healthy check resets the count of stale checks`() =
+        runTest {
+            val (guard, store) = guard()
+            val stale = Screen(TargetApp.INSTAGRAM, surface = null, canary = CanaryResult.STALE)
+
+            repeat(7) { guard.check(stale) }
+            guard.check(Screen(TargetApp.INSTAGRAM, surface = null, canary = CanaryResult.HEALTHY))
+            repeat(7) { guard.check(stale) }
+
+            assertThat(store.state.first().staleRules).isEmpty()
         }
 
     private suspend fun StateStore.usedToday(app: TargetApp) = state.first().usage.usedOn(today, app)

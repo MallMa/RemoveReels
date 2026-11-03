@@ -6,6 +6,7 @@ import io.github.mallma.removereels.budget.BlockReason
 import io.github.mallma.removereels.budget.Decision
 import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.budget.WatchTimer
+import io.github.mallma.removereels.detection.CanaryResult
 import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.storage.StateStore
 import kotlinx.coroutines.flow.first
@@ -13,10 +14,11 @@ import java.time.Clock
 import java.time.LocalDate
 import kotlin.time.Duration
 
-/** A target app in front with the screen on, and the blocked surface it shows, if any. */
+/** A target app in front with the screen on, the blocked surface it shows, if any, and its canary's result. */
 internal data class Screen(
     val app: TargetApp,
     val surface: SurfaceRule?,
+    val canary: CanaryResult = CanaryResult.NOT_APPLICABLE,
 )
 
 /** What the guard asks the accessibility service to do. */
@@ -52,6 +54,7 @@ internal class Guard(
     private val actions: GuardActions,
 ) {
     private var watching: TargetApp? = null
+    private val staleChecks = mutableMapOf<TargetApp, Int>()
 
     /** An allowed Reels or Shorts screen is on, and its time counts. */
     val isWatching: Boolean get() = watching != null
@@ -70,6 +73,21 @@ internal class Guard(
             actions.surfaceGone()
         } else {
             decide(screen.app, surface, today)
+        }
+        if (screen != null) reportCanary(screen)
+    }
+
+    /**
+     * A layout can be briefly incomplete while it loads, so the rules count as stale only after [STALE_CHECKS] stale
+     * checks in a row, and as fine again after one healthy check.
+     */
+    private suspend fun reportCanary(screen: Screen) {
+        if (screen.canary == CanaryResult.NOT_APPLICABLE) return
+        val staleInARow = if (screen.canary == CanaryResult.STALE) staleChecks.getOrDefault(screen.app, 0) + 1 else 0
+        staleChecks[screen.app] = staleInARow
+        when {
+            staleInARow == 0 -> store.setRulesStale(screen.app, stale = false)
+            staleInARow >= STALE_CHECKS -> store.setRulesStale(screen.app, stale = true)
         }
     }
 
@@ -99,5 +117,9 @@ internal class Guard(
     private fun endSession() {
         watching = null
         actions.hideTimeLeft()
+    }
+
+    private companion object {
+        const val STALE_CHECKS = 8
     }
 }

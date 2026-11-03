@@ -33,6 +33,14 @@ internal class StateStore(
         dataStore.updateData { it.copy(usage = it.usage.record(date, app, watched)) }
     }
 
+    /** Remembers whether [app]'s rules look stale. DataStore skips the write when nothing changes. */
+    suspend fun setRulesStale(
+        app: TargetApp,
+        stale: Boolean,
+    ) {
+        dataStore.updateData { it.copy(staleRules = if (stale) it.staleRules + app else it.staleRules - app) }
+    }
+
     companion object {
         /** A store in [file]. A corrupt file is replaced by [AppState.INITIAL], which never loosens the rules. */
         fun create(

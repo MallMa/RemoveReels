@@ -26,6 +26,7 @@ internal data class StoredState(
     val version: Int = CURRENT_VERSION,
     val schedule: StoredSchedule = StoredSchedule(),
     val usage: List<StoredDay> = emptyList(),
+    val staleRules: List<String> = emptyList(),
 ) {
     companion object {
         const val CURRENT_VERSION = 1
@@ -72,6 +73,7 @@ internal fun StoredState.toAppState(): AppState =
                     },
             ),
         usage = UsageLedger(usage.associate { it.date to it.toUsage() }),
+        staleRules = TargetApp.entries.filter { it.storedName in staleRules }.toSet(),
     )
 
 internal fun AppState.toStoredState(): StoredState =
@@ -89,7 +91,16 @@ internal fun AppState.toStoredState(): StoredState =
                     youtubeMillis = apps[TargetApp.YOUTUBE]?.inWholeMilliseconds ?: 0,
                 )
             },
+        staleRules = staleRules.map { it.storedName }.sorted(),
     )
+
+/** How an app is named in stored files; independent of the enum's Kotlin name. */
+private val TargetApp.storedName: String
+    get() =
+        when (this) {
+            TargetApp.INSTAGRAM -> "instagram"
+            TargetApp.YOUTUBE -> "youtube"
+        }
 
 private fun StoredAllowances.toAllowances() =
     Allowances(Allowance.ofMinutes(instagramMinutes), Allowance.ofMinutes(youtubeMinutes))

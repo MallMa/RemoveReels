@@ -31,6 +31,7 @@ class AppStateSerializerTest {
                         UsageLedger()
                             .record(today, TargetApp.YOUTUBE, 7.minutes + 250.milliseconds)
                             .record(today.minusDays(1), TargetApp.INSTAGRAM, 3.minutes),
+                    staleRules = setOf(TargetApp.YOUTUBE),
                 )
 
             assertThat(read(write(state))).isEqualTo(state)

@@ -32,6 +32,16 @@ class StateStoreTest {
         }
 
     @Test
+    fun `stale rules are remembered per app until they fit again`() =
+        runTest {
+            store.setRulesStale(TargetApp.INSTAGRAM, stale = true)
+            assertThat(store.state.first().staleRules).containsExactly(TargetApp.INSTAGRAM)
+
+            store.setRulesStale(TargetApp.INSTAGRAM, stale = false)
+            assertThat(store.state.first().staleRules).isEmpty()
+        }
+
+    @Test
     fun `recorded usage adds up`() =
         runTest {
             store.recordUsage(TargetApp.YOUTUBE, today, 3.seconds)

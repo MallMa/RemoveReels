@@ -106,7 +106,8 @@ internal class GuardHost(
         return if (root == null || app == null) {
             null
         } else {
-            Screen(app, detector.findSurface(app.packageName, AccessibilityScreenTree(root)))
+            val tree = AccessibilityScreenTree(root)
+            Screen(app, detector.findSurface(app.packageName, tree), detector.checkCanary(app.packageName, tree))
         }
     }
 
