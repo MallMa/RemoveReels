@@ -52,6 +52,16 @@ class StateStoreTest {
         }
 
     @Test
+    fun `onboarding runs until it is finished`() =
+        runTest {
+            assertThat(store.state.first().onboardingDone).isFalse()
+
+            store.finishOnboarding()
+
+            assertThat(store.state.first().onboardingDone).isTrue()
+        }
+
+    @Test
     fun `recorded usage adds up`() =
         runTest {
             store.recordUsage(TargetApp.YOUTUBE, today, 3.seconds)

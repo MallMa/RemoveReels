@@ -33,6 +33,7 @@ class AppStateSerializerTest {
                             .record(today.minusDays(1), TargetApp.INSTAGRAM, 3.minutes),
                     staleRules = setOf(TargetApp.YOUTUBE),
                     showTimeLeft = false,
+                    onboardingDone = true,
                 )
 
             assertThat(read(write(state))).isEqualTo(state)

@@ -3,6 +3,7 @@ package io.github.mallma.removereels.ui.keeprunning
 import android.os.Build
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,16 +15,25 @@ import io.github.mallma.removereels.ui.SimpleScreen
 import io.github.mallma.removereels.ui.openAppDetails
 
 @Composable
-internal fun KeepRunningRoute(onBack: () -> Unit) {
+internal fun KeepRunningRoute(
+    onContinue: (() -> Unit)?,
+    onBack: () -> Unit,
+) {
     val context = LocalContext.current
-    KeepRunningScreen(PhoneMaker.of(Build.MANUFACTURER), onOpenAppSettings = context::openAppDetails, onBack = onBack)
+    KeepRunningScreen(
+        maker = PhoneMaker.of(Build.MANUFACTURER),
+        onOpenAppSettings = context::openAppDetails,
+        onContinue = onContinue,
+        onBack = onBack,
+    )
 }
 
-/** How to keep the phone's battery saver from stopping RemoveReels. */
+/** How to keep the phone's battery saver from stopping RemoveReels; [onContinue] is set during onboarding. */
 @Composable
 internal fun KeepRunningScreen(
     maker: PhoneMaker,
     onOpenAppSettings: () -> Unit,
+    onContinue: (() -> Unit)?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -36,5 +46,6 @@ internal fun KeepRunningScreen(
             )
         }
         Button(onClick = onOpenAppSettings) { Text(stringResource(R.string.keep_running_open_app_settings)) }
+        onContinue?.let { OutlinedButton(onClick = it) { Text(stringResource(R.string.onboarding_continue)) } }
     }
 }

@@ -1,9 +1,11 @@
 package io.github.mallma.removereels.guard
 
 import android.accessibilityservice.AccessibilityService
+import android.content.Intent
 import android.os.PowerManager
 import androidx.compose.runtime.mutableStateOf
 import io.github.mallma.removereels.AppContainer
+import io.github.mallma.removereels.MainActivity
 import io.github.mallma.removereels.budget.BlockReason
 import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.budget.WatchTimer
@@ -18,6 +20,7 @@ import io.github.mallma.removereels.targetAppOf
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
@@ -33,6 +36,7 @@ internal class GuardHost(
     container: AppContainer,
 ) : GuardActions {
     private val detector = container.detector
+    private val store = container.stateStore
     private val status = container.guardStatus
     private val power = service.getSystemService(PowerManager::class.java)
     private val audioFocus = AudioFocus(service)
@@ -52,10 +56,11 @@ internal class GuardHost(
             check = { guard.check(readScreen()) },
         )
     private val scope = MainScope()
-    private val state = container.stateStore.state.stateIn(scope, SharingStarted.Eagerly, AppState.INITIAL)
+    private val state = store.state.stateIn(scope, SharingStarted.Eagerly, AppState.INITIAL)
 
     fun start() {
         scope.launch { checks.run() }
+        scope.launch { if (!store.state.first().onboardingDone) returnToOnboarding() }
     }
 
     /** Something changed in Instagram or YouTube; [windowChanged] means a new screen opened. */
@@ -104,6 +109,17 @@ internal class GuardHost(
     }
 
     override fun surfaceGone() = audioFocus.release()
+
+    /**
+     * Onboarding's Turn on step sent the user to Android's settings; this brings them back as soon as the switch is on.
+     * An accessibility service may start an activity from the background.
+     */
+    private fun returnToOnboarding() {
+        service.startActivity(
+            Intent(service, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+        )
+    }
 
     /** Null while the screen is off or neither app is in front. */
     private fun readScreen(): Screen? {

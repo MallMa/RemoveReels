@@ -13,6 +13,33 @@
     <string name="notification_blocking_off">Blocking is off</string>
     <string name="notification_tap_to_turn_on">Tap to turn it back on.</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_continue">Continue</string>
+    <string name="welcome_title">Keep Instagram and YouTube. Lose Reels and Shorts.</string>
+    <string name="welcome_works">✓ Feed, messages, stories, posting and search keep working.</string>
+    <string name="welcome_blocked">✕ Reels and Shorts are blocked.</string>
+    <string name="welcome_allowance">⏱ You can allow up to 45 minutes a day, starting the day after you set it.</string>
+    <string name="welcome_no_off_switch">There is no off switch. Uninstalling is the only way to stop it.</string>
+    <string name="welcome_get_started">Get started</string>
+    <string name="how_it_works_title">How it works</string>
+    <string name="how_it_works_body">RemoveReels uses Android\'s accessibility feature to notice when Instagram or YouTube opens Reels or Shorts.</string>
+    <string name="how_it_works_two_apps">• It only looks at those two apps.</string>
+    <string name="how_it_works_saves_nothing">• It saves nothing you see or type.</string>
+    <string name="how_it_works_no_internet">• It has no internet access.</string>
+    <string name="notifications_title">One notification</string>
+    <string name="notifications_body">RemoveReels sends a single notification, and only when blocking stops: \"Blocking is off. Tap to turn it back on.\"</string>
+    <string name="notifications_granted">Notifications are allowed.</string>
+    <string name="notifications_allow">Allow notifications</string>
+    <string name="notifications_not_now">Not now</string>
+    <string name="turn_on_title">Turn on RemoveReels</string>
+    <string name="turn_on_steps">1. Tap Open settings.\n2. Tap RemoveReels under Installed apps.\n3. Switch it on.</string>
+    <string name="turn_on_restricted">Android protects apps installed from a downloaded file. Allow RemoveReels\' restricted settings first:</string>
+    <string name="turn_on_restricted_steps">1. Tap Open app info.\n2. Tap ⋮ at the top right.\n3. Tap Allow restricted settings.</string>
+    <string name="turn_on_open_settings">Open settings</string>
+    <string name="turn_on_open_app_info">Open app info</string>
+    <string name="turn_on_done_title">✓ Blocking is on</string>
+    <string name="turn_on_done_body">Reels and Shorts are now blocked in Instagram and YouTube.</string>
+
     <!-- Home -->
     <string name="home_blocking_on">Blocking is on</string>
     <string name="home_blocking_off">Blocking is off</string>

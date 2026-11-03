@@ -12,6 +12,7 @@ internal data class AppState(
     val staleRules: Set<TargetApp> = emptySet(),
     /** Whether the timer pill shows while watching within an allowance. */
     val showTimeLeft: Boolean = true,
+    val onboardingDone: Boolean = false,
 ) {
     companion object {
         val INITIAL = AppState(AllowanceSchedule.INITIAL, UsageLedger())

@@ -45,6 +45,10 @@ internal class StateStore(
         dataStore.updateData { it.copy(showTimeLeft = show) }
     }
 
+    suspend fun finishOnboarding() {
+        dataStore.updateData { it.copy(onboardingDone = true) }
+    }
+
     companion object {
         /** A store in [file]. A corrupt file is replaced by [AppState.INITIAL], which never loosens the rules. */
         fun create(
