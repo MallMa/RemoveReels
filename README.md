@@ -33,6 +33,7 @@ Requirements: JDK 21 and the Android SDK (`ANDROID_HOME`). The Gradle wrapper do
 | Path | Contents |
 |---|---|
 | `app/` | The Android app |
+| `budget/` | Pure Kotlin: allowances, schedule, usage and the rules that decide when to block |
 | `build-logic/` | Gradle convention plugins with the shared build configuration and checks |
 | `config/detekt/` | detekt settings on top of the defaults |
 | `docs/` | Plan, engineering standards, architecture decisions |
