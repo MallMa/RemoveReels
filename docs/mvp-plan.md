@@ -96,7 +96,7 @@ stale, and RemoveReels says so instead of failing silently.
 | Dependency injection | A small hand-written `AppContainer` | About a dozen objects; manual wiring is explicit and has no build cost. | Hilt, Koin. |
 | Navigation | Navigation Compose with type-safe routes | Standard, small. | Hand-rolled. |
 | Time | `java.time.Clock` (wall time) and `kotlin.time.TimeSource` (monotonic), both injected | Correct midnights and time zones; sessions immune to clock changes; deterministic tests. | `System.currentTimeMillis()`. |
-| SDK levels | minSdk 33, target/compile 37 (Android 17) | Android 13+ removes compatibility branches (node recycling, notification permission checks, install-source API, per-app language). Lowered only if the author's phone needs it. | minSdk 26 (more legacy code paths for users the project does not target). |
+| SDK levels | minSdk 33, target/compile 37 (Android 17) | Android 13+ removes compatibility branches (node recycling, notification permission checks, install-source API, per-app language). The author's phone runs Android 13 or newer. | minSdk 26 (more legacy code paths for users the project does not target). |
 | Permissions | Accessibility binding, `POST_NOTIFICATIONS`, `<queries>` for the two packages. **No `INTERNET`.** | An app that can see screens should be unable to send anything; Android enforces it. | |
 | Distribution | Release APK on GitHub Releases, installed with `adb` or Android Studio | Personal use; no store review. | Google Play, F-Droid. |
 
@@ -348,7 +348,3 @@ M1 needs the phone connected over USB with Instagram and YouTube installed.
 | A/B tests show different layouts | Rules allow alternative signals; new fixtures when a variant appears |
 | The phone stops the service | Phone-maker guide, 15-minute check and notification |
 | Accessibility API behaviour changes in a new Android version | Target the newest SDK, test on Android betas before they ship |
-
-## 10. Open decisions
-
-- **minSdk.** 33 unless the author's phone runs an older Android version.
