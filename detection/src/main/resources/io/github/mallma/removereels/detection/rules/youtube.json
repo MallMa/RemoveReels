@@ -1,5 +1,6 @@
 {
   "packageName": "com.google.android.youtube",
+  "testedVersion": "21.38.130",
   "surfaces": [
     {
       "name": "shorts",

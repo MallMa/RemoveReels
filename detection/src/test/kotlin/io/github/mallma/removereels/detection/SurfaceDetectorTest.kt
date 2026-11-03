@@ -8,6 +8,7 @@ class SurfaceDetectorTest {
     private val rules =
         AppRules(
             packageName = APP,
+            testedVersion = "1.0",
             surfaces =
                 listOf(
                     SurfaceRule(

@@ -10,6 +10,8 @@ import kotlinx.serialization.json.Json
 @Serializable
 public data class AppRules(
     public val packageName: String,
+    /** The app version whose recorded screens the rules are tested against. */
+    public val testedVersion: String,
     /** The screens to block. */
     public val surfaces: List<SurfaceRule>,
     /** A check that the rules still fit the app's current layout, if the app has a suitable view. */
@@ -19,6 +21,7 @@ public data class AppRules(
 ) {
     init {
         require(packageName.isNotBlank()) { "Rules need a package name" }
+        require(testedVersion.isNotBlank()) { "Rules for $packageName need the app version they were tested with" }
         require(surfaces.isNotEmpty()) { "Rules for $packageName name no surface" }
         require(surfaces.map { it.name }.toSet().size == surfaces.size) { "Rules for $packageName repeat a surface" }
     }

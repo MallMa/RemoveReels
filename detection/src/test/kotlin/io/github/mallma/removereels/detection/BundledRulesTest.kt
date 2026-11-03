@@ -63,6 +63,15 @@ class BundledRulesTest {
         assertThat(recorded).containsAtLeastElementsIn(named)
     }
 
+    @Test
+    fun `each rule list is tested with screens recorded from the version it names`() {
+        rules.forEach { app ->
+            val versions = fixtures.filter { it.snapshot.packageName == app.packageName }.map { it.snapshot.appVersion }
+
+            assertThat(versions).contains(app.testedVersion)
+        }
+    }
+
     @TestFactory
     fun `fixtures are stored exactly as the recorder writes them`(): List<DynamicTest> =
         fixtures.map { fixture ->

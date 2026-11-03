@@ -1,5 +1,6 @@
 {
   "packageName": "com.instagram.android",
+  "testedVersion": "453.0.0.57.79",
   "surfaces": [
     {
       "name": "reels_from_messages",
