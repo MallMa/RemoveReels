@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Events from Instagram and YouTube only; view ids are needed to recognise their screens. -->
+<!--
+    Events from Instagram and YouTube only; view ids are needed to recognise their screens. Android delivers every
+    event at once, and the service limits its own checks, so that a newly opened window is checked without delay.
+-->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
@@ -7,5 +10,5 @@
     android:canRetrieveWindowContent="true"
     android:description="@string/service_description"
     android:isAccessibilityTool="false"
-    android:notificationTimeout="250"
+    android:notificationTimeout="0"
     android:packageNames="com.instagram.android,com.google.android.youtube" />

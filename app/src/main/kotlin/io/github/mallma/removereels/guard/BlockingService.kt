@@ -1,41 +1,32 @@
 package io.github.mallma.removereels.guard
 
 import android.accessibilityservice.AccessibilityService
-import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import io.github.mallma.removereels.detection.BundledRules
-import io.github.mallma.removereels.detection.SurfaceDetector
+import io.github.mallma.removereels.container
 
 /**
- * Watches Instagram and YouTube for Reels and Shorts screens. Android delivers events from those two apps only, as
- * configured in `res/xml/blocking_service.xml`.
+ * Blocks Reels and Shorts screens. Android delivers events from Instagram and YouTube only, as configured in
+ * `res/xml/blocking_service.xml`; the [GuardHost] decides and acts on them.
  */
 class BlockingService : AccessibilityService() {
-    private val detector = SurfaceDetector(BundledRules.load())
     private val recorder = SnapshotRecorder(this)
-    private var lastSurface: String? = null
+    private var host: GuardHost? = null
 
     override fun onServiceConnected() {
+        host = GuardHost(this, container).also { it.start() }
         recorder.start()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        val root = rootInActiveWindow ?: return
-        val surface = detector.findSurface(root.packageName.toString(), AccessibilityScreenTree(root))?.name
-        if (surface != lastSurface) {
-            Log.d(TAG, "Now showing ${surface ?: "no surface"} in ${root.packageName}")
-            lastSurface = surface
-        }
+        host?.onEvent(windowChanged = event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
     }
 
     override fun onInterrupt() = Unit
 
     override fun onDestroy() {
         recorder.stop()
+        host?.stop()
+        host = null
         super.onDestroy()
-    }
-
-    private companion object {
-        const val TAG = "BlockingService"
     }
 }

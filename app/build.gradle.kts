@@ -21,6 +21,9 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.datastore)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.savedstate)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(platform(libs.androidx.compose.bom))
