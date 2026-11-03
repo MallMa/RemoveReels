@@ -25,15 +25,27 @@ internal fun TryItRoute(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val viewModel = viewModel { TryItViewModel(context.container.guardStatus, context.container.installedApps) }
+    val viewModel =
+        viewModel {
+            val container = context.container
+            TryItViewModel(
+                container.guardStatus,
+                container.installedApps,
+                container.stateStore,
+                container.clock,
+                container.automaticTime,
+            )
+        }
     val state by viewModel.state.collectAsStateWithLifecycle()
-    TryItScreen(
-        state = state,
-        onOpenApp = context::launch,
-        onTurnOn = context::openAccessibilitySettings,
-        onDone = onDone,
-        onBack = onBack,
-    )
+    state?.let {
+        TryItScreen(
+            state = it,
+            onOpenApp = context::launch,
+            onTurnOn = context::openAccessibilitySettings,
+            onDone = onDone,
+            onBack = onBack,
+        )
+    }
 }
 
 @Composable
@@ -59,7 +71,8 @@ internal fun TryItScreen(
             }
 
             state.app == null -> {
-                Text(stringResource(R.string.try_it_no_app), style = MaterialTheme.typography.bodyLarge)
+                val reason = if (state.allowedNow) R.string.try_it_time_left else R.string.try_it_no_app
+                Text(stringResource(reason), style = MaterialTheme.typography.bodyLarge)
                 Button(onClick = onDone) { Text(stringResource(R.string.try_it_done)) }
             }
 

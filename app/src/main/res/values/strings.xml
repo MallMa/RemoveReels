@@ -115,6 +115,7 @@
     <string name="try_it_done">Done</string>
     <string name="try_it_worked">✓ It works. Your feed and messages are untouched.</string>
     <string name="try_it_turn_on_first">Blocking is off, so there is nothing to test yet. Turn it on first.</string>
+    <string name="try_it_time_left">The installed apps have time left today, so they show the time left instead of a block. Try again once today\'s allowance is used up.</string>
     <string name="try_it_no_app">Neither Instagram nor YouTube is installed, so there is nothing to test.</string>
 
     <!-- Daily allowance -->

@@ -19,7 +19,10 @@ class TryItScreenTest {
     @Test
     fun `asks to open the app and tap Reels`() {
         var opened: TargetApp? = null
-        show(TryItState(blockingOn = true, app = TargetApp.INSTAGRAM, worked = false), onOpenApp = { opened = it })
+        show(TryItState(blockingOn = true, app = TargetApp.INSTAGRAM, allowedNow = false, worked = false), onOpenApp = {
+            opened =
+                it
+        })
 
         compose.onNodeWithText("Open Instagram and tap the Reels button.").assertIsDisplayed()
         compose.onNodeWithText("Open Instagram").performClick()
@@ -29,7 +32,7 @@ class TryItScreenTest {
 
     @Test
     fun `asks to turn blocking on first`() {
-        show(TryItState(blockingOn = false, app = TargetApp.INSTAGRAM, worked = false))
+        show(TryItState(blockingOn = false, app = TargetApp.INSTAGRAM, allowedNow = false, worked = false))
 
         compose
             .onNodeWithText(
@@ -38,8 +41,19 @@ class TryItScreenTest {
     }
 
     @Test
+    fun `explains when every app has time left today`() {
+        show(TryItState(blockingOn = true, app = null, allowedNow = true, worked = false))
+
+        compose
+            .onNodeWithText(
+                "The installed apps have time left today, so they show the time left instead of a block. " +
+                    "Try again once today's allowance is used up.",
+            ).assertIsDisplayed()
+    }
+
+    @Test
     fun `confirms that it works`() {
-        show(TryItState(blockingOn = true, app = TargetApp.INSTAGRAM, worked = true))
+        show(TryItState(blockingOn = true, app = TargetApp.INSTAGRAM, allowedNow = false, worked = true))
 
         compose.onNodeWithText("✓ It works. Your feed and messages are untouched.").assertIsDisplayed()
     }
