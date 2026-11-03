@@ -108,6 +108,8 @@ internal class GuardHost(
         blockCard.show { BlockCard(BlockNotice(app, reason, surface.openedFromMessages), onContinue = blockCard::hide) }
         val rules = detector.rulesFor(app.packageName)
         backOut.leave(rules?.homeTabViewId?.let(rules::fullViewId))
+        // The back-out may end on the launcher, which sends no events; look again so that audio focus is released.
+        checks.request(urgent = true)
     }
 
     override fun surfaceGone() = audioFocus.release()
