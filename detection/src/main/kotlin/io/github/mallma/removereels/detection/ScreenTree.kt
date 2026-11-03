@@ -32,15 +32,24 @@ public data class Bounds(
     public val area: Long get() = (right - left).coerceAtLeast(0).toLong() * (bottom - top).coerceAtLeast(0)
 
     /** The fraction of [screen] this rectangle covers, from 0 to 1. */
-    public fun shareOf(screen: Bounds): Double {
-        if (screen.area == 0L) return 0.0
-        val visible =
-            Bounds(
-                left = maxOf(left, screen.left),
-                top = maxOf(top, screen.top),
-                right = minOf(right, screen.right),
-                bottom = minOf(bottom, screen.bottom),
-            )
-        return visible.area.toDouble() / screen.area
-    }
+    public fun shareOf(screen: Bounds): Double =
+        if (screen.area ==
+            0L
+        ) {
+            0.0
+        } else {
+            intersect(screen).area.toDouble() / screen.area
+        }
+
+    /** The part of this rectangle inside [other]; empty, with no area, if they do not overlap. */
+    public fun intersect(other: Bounds): Bounds =
+        Bounds(
+            left = maxOf(left, other.left),
+            top = maxOf(top, other.top),
+            right = minOf(right, other.right),
+            bottom = minOf(bottom, other.bottom),
+        )
+
+    public operator fun contains(other: Bounds): Boolean =
+        other.left >= left && other.top >= top && other.right <= right && other.bottom <= bottom
 }

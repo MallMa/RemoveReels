@@ -22,5 +22,12 @@
     }
   ],
   "canary": { "anchorViewId": "tab_bar", "expectedViewId": "clips_tab" },
-  "homeTabViewId": "feed_tab"
+  "homeTabViewId": "feed_tab",
+  "entryPoints": [
+    {
+      "name": "reels_tab",
+      "viewId": "clips_tab",
+      "coverColor": { "light": "#FFFFFF", "dark": "#0C1014" }
+    }
+  ]
 }

@@ -18,12 +18,17 @@ public data class AppRules(
     public val canary: Canary? = null,
     /** The tab that leads back to the app's main screen, tapped if pressing back does not leave a blocked screen. */
     public val homeTabViewId: String? = null,
+    /** The ways into the surfaces, covered while the app is blocked. */
+    public val entryPoints: List<EntryPointRule> = emptyList(),
 ) {
     init {
         require(packageName.isNotBlank()) { "Rules need a package name" }
         require(testedVersion.isNotBlank()) { "Rules for $packageName need the app version they were tested with" }
         require(surfaces.isNotEmpty()) { "Rules for $packageName name no surface" }
         require(surfaces.map { it.name }.toSet().size == surfaces.size) { "Rules for $packageName repeat a surface" }
+        require(entryPoints.map { it.name }.toSet().size == entryPoints.size) {
+            "Rules for $packageName repeat an entry point"
+        }
     }
 
     /** The full resource name of the app's view [viewId]. */

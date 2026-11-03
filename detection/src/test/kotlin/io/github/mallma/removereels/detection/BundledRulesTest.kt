@@ -1,6 +1,8 @@
 package io.github.mallma.removereels.detection
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
@@ -9,12 +11,15 @@ import java.io.File
 
 /**
  * Runs the bundled rules against screens recorded on a phone, stored as
- * `fixtures/<app>/<app version>/<expected surface, or none>/<screen>.json`.
+ * `fixtures/<app>/<app version>/<expected surface, or none>/<screen>.json`. Each version folder's `covers.json`
+ * lists the entry points that must be covered on its screens.
  */
 class BundledRulesTest {
     private val rules = BundledRules.load()
     private val detector = SurfaceDetector(rules)
+    private val root = File(checkNotNull(javaClass.getResource("/fixtures")).toURI())
     private val fixtures = loadFixtures()
+    private val covers = loadCovers()
 
     @TestFactory
     fun `every recorded screen shows the surface its folder names`(): List<DynamicTest> =
@@ -57,7 +62,8 @@ class BundledRulesTest {
                 .flatMap { app ->
                     val signals = app.surfaces.flatMap { it.anyOf + it.allOf }.map { it.viewId }
                     val canary = listOfNotNull(app.canary?.anchorViewId, app.canary?.expectedViewId)
-                    (signals + canary + listOfNotNull(app.homeTabViewId)).map(app::fullViewId)
+                    val entryPoints = app.entryPoints.flatMap { listOfNotNull(it.viewId, it.within) }
+                    (signals + canary + entryPoints + listOfNotNull(app.homeTabViewId)).map(app::fullViewId)
                 }.toSet()
 
         assertThat(recorded).containsAtLeastElementsIn(named)
@@ -70,6 +76,29 @@ class BundledRulesTest {
 
             assertThat(versions).contains(app.testedVersion)
         }
+    }
+
+    @TestFactory
+    fun `every listed screen covers exactly its entry points`(): List<DynamicTest> =
+        covers.map { (path, expected) ->
+            dynamicTest(path) {
+                val fixture = fixtures.single { it.path == path }
+                val found = detector.findEntryPoints(fixture.snapshot.packageName, fixture.snapshot)
+
+                assertThat(found.map { it.name to it.bounds }).containsExactlyElementsIn(
+                    expected.map {
+                        it.name to
+                            it.bounds
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun `every screen recorded with its view tree has its covers listed`() {
+        val withTree = fixtures.filter { fixture -> fixture.snapshot.nodes.any { it.parent != null } }.map { it.path }
+
+        assertThat(covers.keys).containsAtLeastElementsIn(withTree)
     }
 
     @TestFactory
@@ -86,17 +115,36 @@ class BundledRulesTest {
         val snapshot = ScreenSnapshot.fromJson(text)
     }
 
-    private fun loadFixtures(): List<Fixture> {
-        val root = File(checkNotNull(javaClass.getResource("/fixtures")).toURI())
-        return root
+    @Serializable
+    private data class ExpectedCover(
+        val name: String,
+        val bounds: Bounds,
+    )
+
+    private fun loadFixtures(): List<Fixture> =
+        root
             .walk()
-            .filter { it.extension == "json" }
+            .filter { it.extension == "json" && it.name != COVERS_FILE }
             .map { Fixture(it.relativeTo(root).invariantSeparatorsPath, it.readText()) }
             .sortedBy { it.path }
             .toList()
-    }
+
+    /** Every version folder's covers, keyed by screen path from the fixtures folder. */
+    private fun loadCovers(): Map<String, List<ExpectedCover>> =
+        root
+            .walk()
+            .filter { it.name == COVERS_FILE }
+            .flatMap { file ->
+                val folder = file.parentFile.relativeTo(root).invariantSeparatorsPath
+                Json
+                    .decodeFromString<Map<String, List<ExpectedCover>>>(
+                        file.readText(),
+                    ).mapKeys { "$folder/${it.key}" }
+                    .entries
+            }.associate { it.key to it.value }
 
     private companion object {
         const val NO_SURFACE = "none"
+        const val COVERS_FILE = "covers.json"
     }
 }

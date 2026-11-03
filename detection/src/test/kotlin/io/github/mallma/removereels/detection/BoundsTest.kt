@@ -25,6 +25,19 @@ class BoundsTest {
     }
 
     @Test
+    fun `the overlap of two rectangles, empty when they do not touch`() {
+        assertThat(Bounds(0, 0, 600, 600).intersect(Bounds(400, 400, 1000, 1000))).isEqualTo(Bounds(400, 400, 600, 600))
+        assertThat(Bounds(0, 0, 100, 100).intersect(Bounds(200, 200, 300, 300)).area).isEqualTo(0)
+    }
+
+    @Test
+    fun `contains rectangles inside it, edges included`() {
+        assertThat(Bounds(10, 10, 20, 20) in screen).isTrue()
+        assertThat(screen in screen).isTrue()
+        assertThat(Bounds(900, 1900, 1100, 2000) in screen).isFalse()
+    }
+
+    @Test
     fun `nothing covers an empty screen`() {
         assertThat(screen.shareOf(Bounds(0, 0, 0, 0))).isEqualTo(0.0)
     }

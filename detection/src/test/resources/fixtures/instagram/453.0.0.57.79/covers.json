@@ -1,0 +1,15 @@
+{
+  "none/explore.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/feed.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/feed_with_reel_preview.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/messages_inbox.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/other_profile.json": [],
+  "none/own_profile.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/story.json": [],
+  "reels/from_explore.json": [],
+  "reels/from_feed.json": [],
+  "reels/from_feed_with_comments.json": [],
+  "reels/from_profile.json": [],
+  "reels/reels_tab.json": [],
+  "reels_from_messages/from_chat.json": []
+}

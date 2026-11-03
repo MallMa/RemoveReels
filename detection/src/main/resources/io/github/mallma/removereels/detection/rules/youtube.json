@@ -10,5 +10,17 @@
         { "viewId": "reel_player_page_container", "minScreenShare": 0.5 }
       ]
     }
+  ],
+  "entryPoints": [
+    {
+      "name": "shorts_tab",
+      "viewId": "thumbnail_layout",
+      "within": "pivot_bar",
+      "count": 4,
+      "index": 1,
+      "coverParent": 1,
+      "coverColor": { "light": "#FFFFFF", "dark": "#0F0F0F" },
+      "coverInsetTopDp": 1
+    }
   ]
 }
