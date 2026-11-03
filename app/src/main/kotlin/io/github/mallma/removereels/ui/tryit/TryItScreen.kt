@@ -16,7 +16,7 @@ import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.container
 import io.github.mallma.removereels.ui.SimpleScreen
 import io.github.mallma.removereels.ui.launch
-import io.github.mallma.removereels.ui.openAccessibilitySettings
+import io.github.mallma.removereels.ui.turnOnBlocking
 
 /** [TryItScreen] with its view model; [onDone] leaves the step, whether or not the block was tried. */
 @Composable
@@ -41,7 +41,7 @@ internal fun TryItRoute(
         TryItScreen(
             state = it,
             onOpenApp = context::launch,
-            onTurnOn = context::openAccessibilitySettings,
+            onTurnOn = context::turnOnBlocking,
             onDone = onDone,
             onBack = onBack,
         )

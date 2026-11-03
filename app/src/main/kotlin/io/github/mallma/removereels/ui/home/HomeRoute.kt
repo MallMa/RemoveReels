@@ -8,8 +8,8 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.mallma.removereels.container
-import io.github.mallma.removereels.ui.openAccessibilitySettings
 import io.github.mallma.removereels.ui.openDateSettings
+import io.github.mallma.removereels.ui.turnOnBlocking
 
 /** [HomeScreen] with its view model; re-reads the system state whenever the screen comes back into view. */
 @Composable
@@ -34,7 +34,7 @@ internal fun HomeRoute(
     state?.let {
         HomeScreen(
             state = it,
-            onTurnOn = context::openAccessibilitySettings,
+            onTurnOn = context::turnOnBlocking,
             onOpenDateSettings = context::openDateSettings,
             onOpenAllowance = onOpenAllowance,
             onOpenSettings = onOpenSettings,

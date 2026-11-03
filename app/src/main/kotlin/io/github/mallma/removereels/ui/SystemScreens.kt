@@ -8,12 +8,17 @@ import android.provider.Settings
 import android.util.Log
 import androidx.core.net.toUri
 import io.github.mallma.removereels.budget.TargetApp
+import io.github.mallma.removereels.container
 import io.github.mallma.removereels.packageName
 
 private const val TAG = "SystemScreens"
 
-/** Opens Android's accessibility settings, where RemoveReels is listed under the installed apps. */
-internal fun Context.openAccessibilitySettings() {
+/**
+ * Opens Android's accessibility settings, where RemoveReels is listed under the installed apps. The service brings the
+ * app back once it is switched on.
+ */
+internal fun Context.turnOnBlocking() {
+    container.guardStatus.requestTurnOn()
     open(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
 }
 

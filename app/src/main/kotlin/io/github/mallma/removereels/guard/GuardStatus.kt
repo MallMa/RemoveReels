@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 internal class GuardStatus {
     private val runningState = MutableStateFlow(false)
     private val blockCount = MutableStateFlow(0)
+    private var turnOnRequested = false
 
     /**
      * The service is connected, so blocking is on. This is more reliable than Android's list of enabled services: after
@@ -30,4 +31,12 @@ internal class GuardStatus {
     fun blocked() {
         blockCount.update { it + 1 }
     }
+
+    /** A Turn on button sent the user to Android's settings; the service brings the app back when it connects. */
+    fun requestTurnOn() {
+        turnOnRequested = true
+    }
+
+    /** Whether a Turn on button is waiting for the service; true once per request. */
+    fun takeTurnOnRequest(): Boolean = turnOnRequested.also { turnOnRequested = false }
 }

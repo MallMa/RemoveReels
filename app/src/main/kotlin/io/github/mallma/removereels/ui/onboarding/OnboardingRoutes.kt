@@ -14,8 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.mallma.removereels.container
-import io.github.mallma.removereels.ui.openAccessibilitySettings
 import io.github.mallma.removereels.ui.openAppDetails
+import io.github.mallma.removereels.ui.turnOnBlocking
 
 /** [NotificationsStep] with Android's permission request; continues whatever the answer. */
 @Composable
@@ -48,7 +48,7 @@ internal fun TurnOnRoute(onContinue: () -> Unit) {
     TurnOnStep(
         blockingOn = blockingOn,
         installedFromFile = installedFromFile,
-        onOpenSettings = context::openAccessibilitySettings,
+        onOpenSettings = context::turnOnBlocking,
         onOpenAppInfo = context::openAppDetails,
         onContinue = onContinue,
     )

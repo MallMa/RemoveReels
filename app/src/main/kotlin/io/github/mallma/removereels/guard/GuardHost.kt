@@ -21,7 +21,6 @@ import io.github.mallma.removereels.targetAppOf
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -64,7 +63,7 @@ internal class GuardHost(
 
     fun start() {
         scope.launch { checks.run() }
-        scope.launch { if (!store.state.first().onboardingDone) returnToOnboarding() }
+        if (status.takeTurnOnRequest()) returnToApp()
     }
 
     /** Something changed in Instagram or YouTube; [windowChanged] means a new screen opened. */
@@ -131,10 +130,10 @@ internal class GuardHost(
     }
 
     /**
-     * Onboarding's Turn on step sent the user to Android's settings; this brings them back as soon as the switch is on.
-     * An accessibility service may start an activity from the background.
+     * A Turn on button sent the user to Android's settings; this brings them back as soon as the switch is on. An
+     * accessibility service may start an activity from the background.
      */
-    private fun returnToOnboarding() {
+    private fun returnToApp() {
         service.startActivity(
             Intent(service, MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
