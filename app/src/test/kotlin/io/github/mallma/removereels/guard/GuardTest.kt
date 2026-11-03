@@ -8,7 +8,9 @@ import io.github.mallma.removereels.budget.BlockReason
 import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.budget.UsageLedger
 import io.github.mallma.removereels.budget.WatchTimer
+import io.github.mallma.removereels.detection.Bounds
 import io.github.mallma.removereels.detection.CanaryResult
+import io.github.mallma.removereels.detection.EntryPoint
 import io.github.mallma.removereels.detection.Signal
 import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.storage.AppState
@@ -40,6 +42,8 @@ class GuardTest {
     private val reels = Screen(TargetApp.INSTAGRAM, SurfaceRule("reels", listOf(Signal("clips"))))
     private val shorts = Screen(TargetApp.YOUTUBE, SurfaceRule("shorts", listOf(Signal("reel"))))
     private val youtubeHome = Screen(TargetApp.YOUTUBE, surface = null)
+    private val tab = EntryPoint("reels_tab", Bounds(216, 2064, 432, 2190))
+    private val instagramFeed = Screen(TargetApp.INSTAGRAM, surface = null, entryPoints = listOf(tab))
 
     private fun guard(
         instagram: Int = 0,
@@ -193,6 +197,43 @@ class GuardTest {
         }
 
     @Test
+    fun `covers the entry points while the app is blocked`() =
+        runTest {
+            val (guard, _) = guard(instagram = 0)
+
+            guard.check(instagramFeed)
+
+            assertThat(actions.covers.last()).containsExactly(tab)
+            assertThat(guard.isCovering).isTrue()
+        }
+
+    @Test
+    fun `leaves the entry points visible while the allowance has time left`() =
+        runTest {
+            val (guard, _) = guard(youtube = 15)
+
+            guard.check(youtubeHome.copy(entryPoints = listOf(tab)))
+
+            assertThat(actions.covers.last()).isEmpty()
+            assertThat(guard.isCovering).isFalse()
+        }
+
+    @Test
+    fun `removes the covers over a blocked surface and when the app leaves`() =
+        runTest {
+            val (guard, _) = guard(instagram = 0)
+            guard.check(instagramFeed)
+
+            guard.check(reels.copy(entryPoints = listOf(tab)))
+            assertThat(actions.covers.last()).isEmpty()
+
+            guard.check(instagramFeed)
+            guard.check(null)
+            assertThat(actions.covers.last()).isEmpty()
+            assertThat(guard.isCovering).isFalse()
+        }
+
+    @Test
     fun `blocks while automatic date and time is off`() =
         runTest {
             val (guard, _) = guard(youtube = 15)
@@ -285,6 +326,13 @@ class GuardTest {
 
         override fun surfaceGone() {
             surfaceGoneCount++
+        }
+
+        /** The entry points of each call to [cover]. */
+        val covers = mutableListOf<List<EntryPoint>>()
+
+        override fun cover(entryPoints: List<EntryPoint>) {
+            covers += entryPoints
         }
     }
 }

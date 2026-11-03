@@ -7,6 +7,7 @@ import io.github.mallma.removereels.budget.Decision
 import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.budget.WatchTimer
 import io.github.mallma.removereels.detection.CanaryResult
+import io.github.mallma.removereels.detection.EntryPoint
 import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.storage.StateStore
 import kotlinx.coroutines.flow.first
@@ -15,11 +16,15 @@ import java.time.LocalDate
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-/** A target app in front with the screen on, the blocked surface it shows, if any, and its canary's result. */
+/**
+ * A target app in front with the screen on: the blocked surface it shows, if any, its entry points to that surface, and
+ * its canary's result.
+ */
 internal data class Screen(
     val app: TargetApp,
     val surface: SurfaceRule?,
     val canary: CanaryResult = CanaryResult.NOT_APPLICABLE,
+    val entryPoints: List<EntryPoint> = emptyList(),
 )
 
 /** What the guard asks the accessibility service to do. */
@@ -40,6 +45,9 @@ internal interface GuardActions {
 
     /** No blocked surface is on screen. */
     fun surfaceGone()
+
+    /** Covers exactly [entryPoints]; none removes every cover. */
+    fun cover(entryPoints: List<EntryPoint>)
 }
 
 /**
@@ -64,6 +72,10 @@ internal class Guard(
     /** An allowed Reels or Shorts screen is on, and its time counts. */
     val isWatching: Boolean get() = watching != null
 
+    /** Entry points are covered, so the screen must be looked at again even without events. */
+    var isCovering: Boolean = false
+        private set
+
     /**
      * [screen] is null when no target app is in front or the screen is off; neither counts as watching. Throws an
      * [java.io.IOException] if the stored state cannot be read or saved.
@@ -79,12 +91,27 @@ internal class Guard(
             // Counted after the session has ended, so that a failed write cannot keep it running.
             count(watched, today, watchedTime, saveNow = !stillWatching)
         }
+        coverEntryPoints(screen, today)
         if (surface == null) {
             actions.surfaceGone()
         } else {
             decide(screen.app, surface, today)
         }
         if (screen != null) reportCanary(screen)
+    }
+
+    /**
+     * Covers the entry points while the app is blocked (ADR 0008). With allowance left they stay visible, and over a
+     * blocked surface the block card shows instead.
+     */
+    private suspend fun coverEntryPoints(
+        screen: Screen?,
+        today: LocalDate,
+    ) {
+        val blocked = screen != null && screen.surface == null && decision(screen.app, today) is Decision.Block
+        val entryPoints = if (blocked) screen.entryPoints else emptyList()
+        isCovering = entryPoints.isNotEmpty()
+        actions.cover(entryPoints)
     }
 
     /**
@@ -106,9 +133,7 @@ internal class Guard(
         surface: SurfaceRule,
         today: LocalDate,
     ) {
-        val state = store.state.first()
-        val usage = if (unsaved.isPositive()) state.usage.record(unsavedOn, app, unsaved) else state.usage
-        when (val decision = BlockPolicy.decide(app, today, state.schedule, usage, automaticTime.isOn())) {
+        when (val decision = decision(app, today)) {
             is Decision.Allow -> {
                 watching = app
                 timer.start()
@@ -124,6 +149,23 @@ internal class Guard(
                 actions.block(app, surface, decision.reason)
             }
         }
+    }
+
+    /** What the rules decide for [app] now, counting the watching time not saved yet. */
+    private suspend fun decision(
+        app: TargetApp,
+        today: LocalDate,
+    ): Decision {
+        val state = store.state.first()
+        val usage =
+            if (app == watching &&
+                unsaved.isPositive()
+            ) {
+                state.usage.record(unsavedOn, app, unsaved)
+            } else {
+                state.usage
+            }
+        return BlockPolicy.decide(app, today, state.schedule, usage, automaticTime.isOn())
     }
 
     /**
