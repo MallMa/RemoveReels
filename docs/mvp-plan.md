@@ -351,5 +351,4 @@ M1 needs the phone connected over USB with Instagram and YouTube installed.
 
 ## 10. Open decisions
 
-- **License.** GPL-3.0-or-later keeps derivatives open; MIT or Apache-2.0 is more common for portfolio projects.
 - **minSdk.** 33 unless the author's phone runs an older Android version.

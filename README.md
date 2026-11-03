@@ -36,3 +36,7 @@ Requirements: JDK 21 and the Android SDK (`ANDROID_HOME`). The Gradle wrapper do
 | `build-logic/` | Gradle convention plugins with the shared build configuration and checks |
 | `config/detekt/` | detekt settings on top of the defaults |
 | `docs/` | Plan, engineering standards, architecture decisions |
+
+## License
+
+[MIT](LICENSE)
