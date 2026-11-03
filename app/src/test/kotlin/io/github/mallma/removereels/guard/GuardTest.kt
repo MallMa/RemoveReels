@@ -21,7 +21,9 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.io.IOException
 import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -30,7 +32,7 @@ import kotlin.time.TestTimeSource
 
 class GuardTest {
     private val today = LocalDate.of(2026, 11, 2)
-    private val clock = Clock.fixed(today.atTime(20, 0).toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
+    private val clock = MutableClock(today.atTime(20, 0).toInstant(ZoneOffset.UTC))
     private val time = TestTimeSource()
     private val actions = RecordingActions()
     private var automaticTimeOn = true
@@ -67,15 +69,50 @@ class GuardTest {
     @Test
     fun `counts the time an allowed screen stays open`() =
         runTest {
-            val (guard, store) = guard(youtube = 15)
+            val (guard, _) = guard(youtube = 15)
 
             guard.check(shorts)
             time += 3.seconds
             guard.check(shorts)
 
             assertThat(guard.isWatching).isTrue()
-            assertThat(store.usedToday(TargetApp.YOUTUBE)).isEqualTo(3.seconds)
             assertThat(actions.timeLeft).containsExactly(15.minutes, 15.minutes - 3.seconds).inOrder()
+        }
+
+    @Test
+    fun `saves the watching time every five seconds, not on every check`() =
+        runTest {
+            val (guard, store) = guard(youtube = 15)
+
+            guard.check(shorts)
+            repeat(4) {
+                time += 1.seconds
+                guard.check(shorts)
+            }
+            assertThat(store.usedToday(TargetApp.YOUTUBE)).isEqualTo(Duration.ZERO)
+
+            time += 1.seconds
+            guard.check(shorts)
+            assertThat(store.usedToday(TargetApp.YOUTUBE)).isEqualTo(5.seconds)
+        }
+
+    @Test
+    fun `time before midnight counts for that day, after it for the next`() =
+        runTest {
+            val (guard, store) = guard(youtube = 15)
+            clock.now = today.atTime(23, 59, 57).toInstant(ZoneOffset.UTC)
+
+            guard.check(shorts)
+            repeat(6) {
+                time += 1.seconds
+                clock.now = clock.now.plusSeconds(1)
+                guard.check(shorts)
+            }
+            guard.check(null)
+
+            val usage = store.state.first().usage
+            assertThat(usage.usedOn(today, TargetApp.YOUTUBE)).isEqualTo(2.seconds)
+            assertThat(usage.usedOn(today.plusDays(1), TargetApp.YOUTUBE)).isEqualTo(4.seconds)
         }
 
     @Test
@@ -204,6 +241,17 @@ class GuardTest {
         }
 
     private suspend fun StateStore.usedToday(app: TargetApp) = state.first().usage.usedOn(today, app)
+
+    /** A clock the test moves by hand, in UTC. */
+    private class MutableClock(
+        var now: Instant,
+    ) : Clock() {
+        override fun getZone(): ZoneId = ZoneOffset.UTC
+
+        override fun withZone(zone: ZoneId): Clock = this
+
+        override fun instant(): Instant = now
+    }
 
     private data class Block(
         val screen: Screen,

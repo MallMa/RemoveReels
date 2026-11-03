@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import java.time.Clock
 import java.time.LocalDate
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /** A target app in front with the screen on, the blocked surface it shows, if any, and its canary's result. */
 internal data class Screen(
@@ -56,6 +57,10 @@ internal class Guard(
     private var watching: TargetApp? = null
     private val staleChecks = mutableMapOf<TargetApp, Int>()
 
+    /** Watching time of [watching] on [unsavedOn] that is not saved yet; see [count]. */
+    private var unsaved = Duration.ZERO
+    private var unsavedOn = LocalDate.MIN
+
     /** An allowed Reels or Shorts screen is on, and its time counts. */
     val isWatching: Boolean get() = watching != null
 
@@ -71,8 +76,8 @@ internal class Guard(
             val stillWatching = surface != null && screen.app == watched
             val watchedTime = if (stillWatching) timer.lap() else timer.stop()
             if (!stillWatching) endSession()
-            // Saved after the session has ended, so that a failed write cannot keep it running.
-            store.recordUsage(watched, today, watchedTime)
+            // Counted after the session has ended, so that a failed write cannot keep it running.
+            count(watched, today, watchedTime, saveNow = !stillWatching)
         }
         if (surface == null) {
             actions.surfaceGone()
@@ -102,7 +107,8 @@ internal class Guard(
         today: LocalDate,
     ) {
         val state = store.state.first()
-        when (val decision = BlockPolicy.decide(app, today, state.schedule, state.usage, automaticTime.isOn())) {
+        val usage = if (unsaved.isPositive()) state.usage.record(unsavedOn, app, unsaved) else state.usage
+        when (val decision = BlockPolicy.decide(app, today, state.schedule, usage, automaticTime.isOn())) {
             is Decision.Allow -> {
                 watching = app
                 timer.start()
@@ -113,10 +119,33 @@ internal class Guard(
                 if (watching != null) {
                     timer.stop()
                     endSession()
+                    save(app)
                 }
                 actions.block(app, surface, decision.reason)
             }
         }
+    }
+
+    /**
+     * Adds [watched] to the unsaved time, and saves it every [SAVE_INTERVAL], when the date changes and when [saveNow]
+     * ends a session. Saving on every check would rewrite the state file up to four times a second.
+     */
+    private suspend fun count(
+        app: TargetApp,
+        today: LocalDate,
+        watched: Duration,
+        saveNow: Boolean,
+    ) {
+        if (unsaved.isPositive() && today != unsavedOn) save(app)
+        unsaved += watched
+        unsavedOn = today
+        if (saveNow || unsaved >= SAVE_INTERVAL) save(app)
+    }
+
+    private suspend fun save(app: TargetApp) {
+        val time = unsaved
+        unsaved = Duration.ZERO
+        if (time.isPositive()) store.recordUsage(app, unsavedOn, time)
     }
 
     private fun endSession() {
@@ -126,5 +155,8 @@ internal class Guard(
 
     private companion object {
         const val STALE_CHECKS = 8
+
+        /** At most this much watching time is lost if the service stops, well within the 5 s accuracy target. */
+        val SAVE_INTERVAL = 5.seconds
     }
 }
