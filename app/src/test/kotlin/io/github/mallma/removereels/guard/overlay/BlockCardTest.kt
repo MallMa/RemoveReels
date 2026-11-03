@@ -53,8 +53,9 @@ class BlockCardTest {
         show(BlockNotice(TargetApp.YOUTUBE, BlockReason.AutomaticTimeOff, openedFromMessages = false))
 
         compose
-            .onNodeWithText("Allowances need automatic date and time. Until it's on, Reels and Shorts stay blocked.")
-            .assertIsDisplayed()
+            .onNodeWithText(
+                "Allowances need automatic date, time and time zone. Until they're on, Reels and Shorts stay blocked.",
+            ).assertIsDisplayed()
     }
 
     @Test

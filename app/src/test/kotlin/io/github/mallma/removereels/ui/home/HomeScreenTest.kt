@@ -111,7 +111,8 @@ class HomeScreenTest {
                 "This app may have changed. Some of its screens may not be blocked until RemoveReels is updated.",
             ).assertIsDisplayed()
         compose
-            .onNodeWithText("Allowances need automatic date and time. Until it's on, Reels and Shorts stay blocked.")
-            .assertIsDisplayed()
+            .onNodeWithText(
+                "Allowances need automatic date, time and time zone. Until they're on, Reels and Shorts stay blocked.",
+            ).assertIsDisplayed()
     }
 }

@@ -32,7 +32,7 @@ published on Google Play.
 | Changes start tomorrow | Every change, up or down, takes effect at the next local midnight and stays until changed again. Today's allowance never changes. |
 | No off switch | The app has no setting that pauses or disables blocking, for either app. Uninstalling is the only way to stop it. |
 | System switch | Android always lets the user turn an accessibility service off. If that happens, a notification says blocking is off until it is turned back on. |
-| Automatic time required | Allowances apply only while Android's *automatic date & time* is on. Otherwise both apps are fully blocked, which closes the "change the date" loophole. |
+| Automatic time required | Allowances apply only while Android's *automatic date & time* and *automatic time zone* are on. Otherwise both apps are fully blocked, which closes the "change the date" and "change the time zone" loopholes (ADR 0007). |
 | What counts | Time while a Reels or Shorts screen is visible, the screen is on and that app is in front. |
 
 Consequences worth knowing:
@@ -226,7 +226,7 @@ Turn on                          Try it
 ```
 
 Card states: *blocked* · *X of Y min left* · *used up today* · *not installed* · *rules may be out of date*
-(canary failed). A banner explains when automatic date & time is off: "Allowances need automatic date & time. Until
+(canary failed). A banner explains when automatic date, time or time zone is off: "Allowances need automatic date, time and time zone. Until
 it's on, Reels and Shorts stay blocked."
 
 ### Daily allowance

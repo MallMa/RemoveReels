@@ -30,7 +30,11 @@ internal class AppContainer(
     val stateStore = StateStore.create(context.dataStoreFile("state.json"), scope)
     val detector = SurfaceDetector(BundledRules.load())
     val automaticTime =
-        AutomaticTime { Settings.Global.getInt(context.contentResolver, Settings.Global.AUTO_TIME, 0) == 1 }
+        AutomaticTime {
+            val resolver = context.contentResolver
+            Settings.Global.getInt(resolver, Settings.Global.AUTO_TIME, 0) == 1 &&
+                Settings.Global.getInt(resolver, Settings.Global.AUTO_TIME_ZONE, 0) == 1
+        }
     val guardStatus = GuardStatus()
     val appVersion: String =
         context.packageManager
@@ -49,7 +53,10 @@ internal fun interface InstalledApps {
     fun versionOf(app: TargetApp): String?
 }
 
-/** Whether Android sets the date and time from the network, which allowances need (ADR 0003). */
+/**
+ * Whether Android sets the date, time and time zone from the network, which allowances need (ADR 0003, ADR 0007). A
+ * manual time zone would move the date up to a day ahead.
+ */
 internal fun interface AutomaticTime {
     fun isOn(): Boolean
 }

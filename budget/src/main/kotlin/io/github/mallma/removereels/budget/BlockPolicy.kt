@@ -25,7 +25,7 @@ public sealed interface BlockReason {
         public val allowance: Allowance,
     ) : BlockReason
 
-    /** Android's automatic date and time is off, which suspends every allowance. */
+    /** Android's automatic date, time or time zone is off, which suspends every allowance. */
     public data object AutomaticTimeOff : BlockReason
 }
 

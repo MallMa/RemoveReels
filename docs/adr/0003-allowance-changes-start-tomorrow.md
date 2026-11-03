@@ -1,6 +1,6 @@
 # 0003: Allowance changes start tomorrow; no off switch
 
-Status: Accepted · 2026-11-01
+Status: Accepted · 2026-11-01 · Amended by [0007](0007-allowances-need-automatic-time-zone.md)
 
 ## Context
 

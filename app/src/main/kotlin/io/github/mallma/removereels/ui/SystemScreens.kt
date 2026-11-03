@@ -13,7 +13,7 @@ internal fun Context.openAccessibilitySettings() {
     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
 }
 
-/** Opens Android's date and time settings, where automatic time is switched on. */
+/** Opens Android's date and time settings, where automatic date, time and time zone are switched on. */
 internal fun Context.openDateSettings() {
     startActivity(Intent(Settings.ACTION_DATE_SETTINGS))
 }
