@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import io.github.mallma.removereels.detection.ScreenSnapshot
 import io.github.mallma.removereels.detection.SnapshotNode
+import io.github.mallma.removereels.targetAppOf
 import java.io.File
 
 /**
@@ -35,7 +36,12 @@ internal class SnapshotRecorder(
                 val root = service.rootInActiveWindow
                 when {
                     !name.matches(SAFE_NAME) -> Log.w(TAG, "Snapshot name must match $SAFE_NAME: '$name'")
+
                     root == null -> Log.w(TAG, "No active window to record")
+
+                    // Other apps are none of RemoveReels' business, and their versions are not visible to it.
+                    targetAppOf(root.packageName) == null -> Log.w(TAG, "Records only Instagram and YouTube")
+
                     else -> save(name, root)
                 }
             }
