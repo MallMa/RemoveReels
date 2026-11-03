@@ -1,5 +1,5 @@
 [versions]
-agp = "9.4.1"
+agp = "9.5.0"
 kotlin = "2.4.21"
 # 2.0 is still an alpha, but detekt 1.x does not support Kotlin 2.4.
 detekt = "2.0.0-alpha.6"
