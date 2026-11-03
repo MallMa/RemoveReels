@@ -31,3 +31,4 @@ rootProject.name = "RemoveReels"
 
 include(":app")
 include(":budget")
+include(":detection")
