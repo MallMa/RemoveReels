@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.time.LocalDate
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -38,6 +39,7 @@ internal class GuardHost(
     container: AppContainer,
 ) : GuardActions {
     private val detector = container.detector
+    private val clock = container.clock
     private val store = container.stateStore
     private val status = container.guardStatus
     private val power = service.getSystemService(PowerManager::class.java)
@@ -105,7 +107,9 @@ internal class GuardHost(
     ) {
         audioFocus.hold()
         status.blocked()
-        blockCard.show { BlockCard(BlockNotice(app, reason, surface.openedFromMessages), onContinue = blockCard::hide) }
+        val tomorrow = state.value.schedule.allowancesOn(LocalDate.now(clock).plusDays(1))[app]
+        val notice = BlockNotice(app, reason, surface.openedFromMessages, allowedTomorrow = !tomorrow.isBlocked)
+        blockCard.show { BlockCard(notice, onContinue = blockCard::hide) }
         val rules = detector.rulesFor(app.packageName)
         backOut.leave(rules?.homeTabViewId?.let(rules::fullViewId))
         // The back-out may end on the launcher, which sends no events; look again so that audio focus is released.

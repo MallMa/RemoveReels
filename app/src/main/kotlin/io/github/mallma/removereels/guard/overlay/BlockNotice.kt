@@ -8,4 +8,6 @@ internal data class BlockNotice(
     val app: TargetApp,
     val reason: BlockReason,
     val openedFromMessages: Boolean,
+    /** The app has an allowance tomorrow, so a used-up one can say it comes back. */
+    val allowedTomorrow: Boolean = false,
 )

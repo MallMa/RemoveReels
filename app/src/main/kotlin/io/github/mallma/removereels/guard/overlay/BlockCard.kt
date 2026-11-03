@@ -76,6 +76,7 @@ private fun BlockNotice.lines(): List<String> =
             BlockReason.AutomaticTimeOff -> stringResource(R.string.block_automatic_time_off)
             BlockReason.NoAllowance -> null
         },
+        if (reason is BlockReason.UsedUp && allowedTomorrow) stringResource(R.string.block_back_tomorrow) else null,
         stringResource(app.stillWorks),
         if (openedFromMessages) stringResource(R.string.block_from_messages) else null,
     )

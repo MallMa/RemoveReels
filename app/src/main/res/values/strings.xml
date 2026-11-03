@@ -150,8 +150,9 @@
     <string name="block_title_youtube">Shorts are blocked</string>
     <string name="block_still_works_instagram">Your feed, messages and stories still work.</string>
     <string name="block_still_works_youtube">Your videos, subscriptions and search still work.</string>
-    <string name="block_used_up_instagram">You\'ve used today\'s %1$d min of Reels. They\'re back tomorrow.</string>
-    <string name="block_used_up_youtube">You\'ve used today\'s %1$d min of Shorts. They\'re back tomorrow.</string>
+    <string name="block_used_up_instagram">You\'ve used today\'s %1$d min of Reels.</string>
+    <string name="block_used_up_youtube">You\'ve used today\'s %1$d min of Shorts.</string>
+    <string name="block_back_tomorrow">They\'re back tomorrow.</string>
     <string name="block_automatic_time_off">Allowances need automatic date, time and time zone. Until they\'re on, Reels and Shorts stay blocked.</string>
     <string name="block_from_messages">Reels in messages are blocked too.</string>
     <string name="block_continue_instagram">Continue in Instagram</string>

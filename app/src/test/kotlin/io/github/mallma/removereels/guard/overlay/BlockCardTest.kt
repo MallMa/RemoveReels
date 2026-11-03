@@ -41,11 +41,26 @@ class BlockCardTest {
 
     @Test
     fun `says when today's allowance is used up`() {
-        show(BlockNotice(TargetApp.YOUTUBE, BlockReason.UsedUp(Allowance.ofMinutes(20)), openedFromMessages = false))
+        show(
+            BlockNotice(
+                TargetApp.YOUTUBE,
+                BlockReason.UsedUp(Allowance.ofMinutes(20)),
+                openedFromMessages = false,
+                allowedTomorrow = true,
+            ),
+        )
 
         compose.onNodeWithText("Shorts are blocked").assertIsDisplayed()
-        compose.onNodeWithText("You've used today's 20 min of Shorts. They're back tomorrow.").assertIsDisplayed()
+        compose.onNodeWithText("You've used today's 20 min of Shorts.").assertIsDisplayed()
+        compose.onNodeWithText("They're back tomorrow.").assertIsDisplayed()
         compose.onNodeWithText("Your videos, subscriptions and search still work.").assertIsDisplayed()
+    }
+
+    @Test
+    fun `does not promise tomorrow when tomorrow is blocked`() {
+        show(BlockNotice(TargetApp.YOUTUBE, BlockReason.UsedUp(Allowance.ofMinutes(20)), openedFromMessages = false))
+
+        compose.onNodeWithText("They're back tomorrow.").assertDoesNotExist()
     }
 
     @Test
