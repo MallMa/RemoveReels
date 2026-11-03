@@ -67,11 +67,18 @@ Enforcer
 **Detection.** Each app builds its screens from views with internal ids (Instagram calls Reels "clips" internally).
 The detector looks ids up directly instead of walking the whole screen, which keeps it fast and light on battery. A
 match only counts when the view is visible and covers most of the screen, so a thumbnail in the feed never triggers a
-block. The real ids are recorded from a device in milestone M1; the rule lists are data (`rules/*.json`), not code.
+block. The rule lists are data
+([`detection/src/main/resources/.../rules`](../detection/src/main/resources/io/github/mallma/removereels/detection/rules)),
+not code, and are tested against screens recorded on a phone
+([`detection/src/test/resources/fixtures`](../detection/src/test/resources/fixtures)). Instagram 453 marks every Reels
+viewer with `clips_viewer_view_pager`, and a Reel opened from a chat also shows `sender_profile_pic`; stories use
+different `reel_viewer_*` ids and stay untouched. YouTube 21.38 marks the Shorts player with `reel_recycler` and
+`reel_watch_player`. Debug builds can record new screens through adb; see `SnapshotRecorder`.
 
-**Canaries.** Each rule list also names an element that should always exist on the app's main screen, such as the
-Reels tab button. If the main screen appears without it, the app's layout has probably changed and the rules are
-stale, and RemoveReels says so instead of failing silently.
+**Canaries.** A rule list can also name an element that should always appear with the app's main screen, such as the
+Reels tab button next to Instagram's tab bar. If the main screen appears without it, the app's layout has probably
+changed and the rules are stale, and RemoveReels says so instead of failing silently. YouTube's tab bar items have no
+view ids, so YouTube has no canary; its fixture tests are the safety net.
 
 | | Instagram | YouTube |
 |---|---|---|
