@@ -3,6 +3,7 @@ package io.github.mallma.removereels.guard
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.os.PowerManager
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import io.github.mallma.removereels.AppContainer
 import io.github.mallma.removereels.MainActivity
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -53,7 +55,7 @@ internal class GuardHost(
             spacing = CHECK_SPACING,
             tick = WATCH_TICK,
             ticking = { guard.isWatching },
-            check = { guard.check(readScreen()) },
+            check = ::checkScreen,
         )
     private val scope = MainScope()
     private val state = store.state.stateIn(scope, SharingStarted.Eagerly, AppState.INITIAL)
@@ -110,6 +112,18 @@ internal class GuardHost(
 
     override fun surfaceGone() = audioFocus.release()
 
+    private suspend fun checkScreen() {
+        val screen = readScreen()
+        try {
+            guard.check(screen)
+        } catch (e: IOException) {
+            // Without the stored state the rules cannot be applied. Blocking is the safe answer, as for a corrupt file,
+            // and an exception here would crash the service, which Android then does not restart.
+            Log.e(TAG, "Stored state unavailable, blocking", e)
+            screen?.surface?.let { block(screen.app, it, BlockReason.NoAllowance) }
+        }
+    }
+
     /**
      * Onboarding's Turn on step sent the user to Android's settings; this brings them back as soon as the switch is on.
      * An accessibility service may start an activity from the background.
@@ -139,6 +153,8 @@ internal class GuardHost(
 
         /** How often watching time is counted when nothing else happens. */
         val WATCH_TICK = 1.seconds
+
+        const val TAG = "GuardHost"
 
         /** How long a back press or tap gets before the screen is checked again. */
         val BACK_OUT_SETTLE = 400.milliseconds

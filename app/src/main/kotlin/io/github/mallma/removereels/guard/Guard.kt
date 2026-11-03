@@ -59,15 +59,20 @@ internal class Guard(
     /** An allowed Reels or Shorts screen is on, and its time counts. */
     val isWatching: Boolean get() = watching != null
 
-    /** [screen] is null when no target app is in front or the screen is off; neither counts as watching. */
+    /**
+     * [screen] is null when no target app is in front or the screen is off; neither counts as watching. Throws an
+     * [java.io.IOException] if the stored state cannot be read or saved.
+     */
     suspend fun check(screen: Screen?) {
         val today = LocalDate.now(clock)
         val surface = screen?.surface
         val watched = watching
         if (watched != null) {
             val stillWatching = surface != null && screen.app == watched
-            store.recordUsage(watched, today, if (stillWatching) timer.lap() else timer.stop())
+            val watchedTime = if (stillWatching) timer.lap() else timer.stop()
             if (!stillWatching) endSession()
+            // Saved after the session has ended, so that a failed write cannot keep it running.
+            store.recordUsage(watched, today, watchedTime)
         }
         if (surface == null) {
             actions.surfaceGone()

@@ -15,8 +15,11 @@ import io.github.mallma.removereels.storage.AppState
 import io.github.mallma.removereels.storage.InMemoryDataStore
 import io.github.mallma.removereels.storage.StateStore
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
 import org.junit.Test
+import java.io.IOException
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -133,6 +136,23 @@ class GuardTest {
 
             assertThat(store.usedToday(TargetApp.YOUTUBE)).isEqualTo(4.seconds)
             assertThat(store.usedToday(TargetApp.INSTAGRAM)).isEqualTo(6.seconds)
+        }
+
+    @Test
+    fun `a failed save still ends the session`() =
+        runTest {
+            val state =
+                AppState(AllowanceSchedule(Allowances(Allowance.BLOCKED, Allowance.ofMinutes(15))), UsageLedger())
+            val dataStore = InMemoryDataStore(state)
+            val guard = Guard(clock, { true }, StateStore(dataStore), WatchTimer(time), actions)
+            guard.check(shorts)
+            dataStore.failWrites = true
+            time += 2.seconds
+
+            assertThrows(IOException::class.java) { runBlocking { guard.check(null) } }
+
+            assertThat(guard.isWatching).isFalse()
+            assertThat(actions.timeLeftHidden).isEqualTo(1)
         }
 
     @Test
