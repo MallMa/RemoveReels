@@ -160,7 +160,8 @@ private fun AppEditor(
         }
         Choice(R.string.allowance_block_completely, selected = allowance.isBlocked, enabled = true) { onBlock(app) }
         Choice(R.string.allowance_allow, selected = !allowance.isBlocked, enabled = state.canAllow(app)) {
-            onAllow(app, STEP_MINUTES)
+            // Selecting Allow again keeps the minutes already chosen.
+            if (allowance.isBlocked) onAllow(app, STEP_MINUTES)
         }
         when {
             !state.canAllow(app) -> {

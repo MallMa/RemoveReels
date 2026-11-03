@@ -87,6 +87,19 @@ class AllowanceScreenTest {
     }
 
     @Test
+    fun `selecting Allow again keeps the chosen minutes`() {
+        var allowed: Pair<TargetApp, Int>? = null
+        show(state(Allowances(Allowance.BLOCKED, Allowance.ofMinutes(20))), onAllow = { app, minutes ->
+            allowed =
+                app to minutes
+        })
+
+        compose.onAllNodesWithText("Allow")[1].performClick()
+
+        assertThat(allowed).isNull()
+    }
+
+    @Test
     fun `asks to lower the other app first when it has the whole maximum`() {
         show(state(Allowances(Allowance.BLOCKED, Allowance.ofMinutes(45))))
 
