@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.mutableStateOf
-import io.github.mallma.removereels.guard.BlockingCheckWorker
 import io.github.mallma.removereels.ui.RemoveReelsApp
 import io.github.mallma.removereels.ui.theme.RemoveReelsTheme
 
@@ -17,7 +16,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        BlockingCheckWorker.schedule(this)
         // A recreated activity has handled its intent already.
         if (savedInstanceState == null) openTurnOn.value = intent.opensTurnOn()
         setContent {

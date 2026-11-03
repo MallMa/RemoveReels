@@ -38,8 +38,8 @@ internal class BlockingCheckWorker(
         private val CONNECT_GRACE = 10.seconds
 
         /**
-         * Schedules the check. The app and the service both call this when they start; an existing schedule is kept,
-         * and WorkManager keeps it across restarts.
+         * Schedules the check. The service calls this when it connects and the app once onboarding is done; an existing
+         * schedule is kept, and WorkManager keeps it across restarts.
          */
         fun schedule(context: Context) {
             val request =

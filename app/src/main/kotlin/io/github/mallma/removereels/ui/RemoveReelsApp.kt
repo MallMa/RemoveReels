@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.mallma.removereels.container
+import io.github.mallma.removereels.guard.BlockingCheckWorker
 import io.github.mallma.removereels.ui.allowance.AllowanceRoute
 import io.github.mallma.removereels.ui.home.HomeRoute
 import io.github.mallma.removereels.ui.keeprunning.KeepRunningRoute
@@ -40,7 +41,11 @@ fun RemoveReelsApp(
     onTurnOnOpened: () -> Unit = {},
 ) {
     val context = LocalContext.current
-    val viewModel = viewModel { AppViewModel(context.container.stateStore) }
+    val viewModel =
+        viewModel {
+            val appContext = context.applicationContext
+            AppViewModel(appContext.container.stateStore) { BlockingCheckWorker.schedule(appContext) }
+        }
     val onboardingDone by viewModel.onboardingDone.collectAsStateWithLifecycle()
     // Chosen once, when the stored state is known; finishing onboarding then navigates to Home.
     val start =
