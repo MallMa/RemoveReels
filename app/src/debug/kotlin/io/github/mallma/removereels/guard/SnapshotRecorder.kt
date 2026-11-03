@@ -79,23 +79,24 @@ internal class SnapshotRecorder(
         Log.i(TAG, "Saved ${nodes.size} views of $packageName ${snapshot.appVersion} to $file")
     }
 
-    /** Depth first, keeping views that have an id; text and descriptions are never read. */
+    /** Depth first, with each view's parent; text and descriptions are never read. */
     private fun collect(
         node: AccessibilityNodeInfo,
         into: MutableList<SnapshotNode>,
+        parent: Int? = null,
     ) {
-        node.viewIdResourceName?.let { viewId ->
-            into +=
-                SnapshotNode(
-                    viewId,
-                    node.className?.toString().orEmpty(),
-                    node.boundsInScreen(),
-                    node.isVisibleToUser,
-                    node.isSelected,
-                )
-        }
-        for (index in 0 until node.childCount) {
-            node.getChild(index)?.let { collect(it, into) }
+        val index = into.size
+        into +=
+            SnapshotNode(
+                viewId = node.viewIdResourceName,
+                className = node.className?.toString().orEmpty(),
+                bounds = node.boundsInScreen(),
+                visible = node.isVisibleToUser,
+                selected = node.isSelected,
+                parent = parent,
+            )
+        for (child in 0 until node.childCount) {
+            node.getChild(child)?.let { collect(it, into, index) }
         }
     }
 

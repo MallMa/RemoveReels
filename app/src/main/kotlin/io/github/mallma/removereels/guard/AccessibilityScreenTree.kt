@@ -13,9 +13,17 @@ internal class AccessibilityScreenTree(
     override val screen: Bounds = root.boundsInScreen()
 
     override fun findByViewId(viewId: String): List<ScreenNode> =
-        root.findAccessibilityNodeInfosByViewId(viewId).map { node ->
-            ScreenNode(node.boundsInScreen(), node.isVisibleToUser, node.isSelected)
-        }
+        root.findAccessibilityNodeInfosByViewId(viewId).map(::AccessibilityScreenNode)
+}
+
+/** A view of another app; each property asks that app, so the detector reads only what it needs. */
+private class AccessibilityScreenNode(
+    private val node: AccessibilityNodeInfo,
+) : ScreenNode {
+    override val bounds: Bounds get() = node.boundsInScreen()
+    override val isVisibleToUser: Boolean get() = node.isVisibleToUser
+    override val isSelected: Boolean get() = node.isSelected
+    override val parent: ScreenNode? get() = node.parent?.let(::AccessibilityScreenNode)
 }
 
 internal fun AccessibilityNodeInfo.boundsInScreen(): Bounds {

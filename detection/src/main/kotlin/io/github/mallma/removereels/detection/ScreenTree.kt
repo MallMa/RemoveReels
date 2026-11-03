@@ -11,12 +11,15 @@ public interface ScreenTree {
     public fun findByViewId(viewId: String): List<ScreenNode>
 }
 
-/** One view: where it is and whether the user can see it. */
-public data class ScreenNode(
-    public val bounds: Bounds,
-    public val isVisibleToUser: Boolean,
-    public val isSelected: Boolean,
-)
+/** One view: where it is, whether the user can see it, and the view that contains it. */
+public interface ScreenNode {
+    public val bounds: Bounds
+    public val isVisibleToUser: Boolean
+    public val isSelected: Boolean
+
+    /** The view that contains this one; null for the window's root, and where the tree is not known. */
+    public val parent: ScreenNode?
+}
 
 /** A rectangle in screen pixels. [right] and [bottom] are exclusive, as in Android's `Rect`. */
 @Serializable
