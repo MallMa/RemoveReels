@@ -40,9 +40,11 @@ class AllowanceViewModelTest {
         youtube: Int,
     ) = Allowances(Allowance.ofMinutes(instagram), Allowance.ofMinutes(youtube))
 
+    private var automaticTimeOn = true
+
     private fun editor(schedule: AllowanceSchedule = AllowanceSchedule.INITIAL): Pair<AllowanceViewModel, StateStore> {
         val store = StateStore(InMemoryDataStore(AppState(schedule, UsageLedger())))
-        return AllowanceViewModel(store, clock) to store
+        return AllowanceViewModel(store, clock) { automaticTimeOn } to store
     }
 
     private suspend fun AllowanceViewModel.current() = state.filterNotNull().first()
@@ -105,12 +107,31 @@ class AllowanceViewModelTest {
         runTest {
             val (editor, store) = editor()
 
+            var startsOn: LocalDate? = null
+
             editor.allow(TargetApp.YOUTUBE, 20)
-            editor.save()
+            editor.save { startsOn = it }
 
             val schedule = store.state.first().schedule
             assertThat(schedule.allowancesOn(today)).isEqualTo(Allowances.BLOCKED)
             assertThat(schedule.allowancesOn(today.plusDays(1))).isEqualTo(allowances(0, 20))
             assertThat(editor.current().hasChanges).isFalse()
+            assertThat(startsOn).isEqualTo(today.plusDays(1))
+        }
+
+    @Test
+    fun `refuses to save while automatic time is off`() =
+        runTest {
+            val (editor, store) = editor()
+            automaticTimeOn = false
+            var saved = false
+
+            editor.allow(TargetApp.YOUTUBE, 20)
+            editor.save { saved = true }
+
+            assertThat(saved).isFalse()
+            assertThat(store.state.first().schedule).isEqualTo(AllowanceSchedule.INITIAL)
+            assertThat(editor.current().automaticTimeOn).isFalse()
+            assertThat(editor.current().canSave).isFalse()
         }
 }

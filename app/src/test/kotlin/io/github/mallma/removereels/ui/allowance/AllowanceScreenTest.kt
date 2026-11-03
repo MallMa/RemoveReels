@@ -33,7 +33,14 @@ class AllowanceScreenTest {
     private fun state(
         today: Allowances,
         draft: Allowances = today,
-    ) = AllowanceEditorState(today = today, saved = today, draft = draft, startsOn = tomorrow)
+        automaticTimeOn: Boolean = true,
+    ) = AllowanceEditorState(
+        today,
+        saved = today,
+        draft = draft,
+        startsOn = tomorrow,
+        automaticTimeOn = automaticTimeOn,
+    )
 
     private fun show(
         state: AllowanceEditorState,
@@ -45,6 +52,7 @@ class AllowanceScreenTest {
             onBlock = {},
             onAllow = onAllow,
             onSave = onSave,
+            onOpenDateSettings = {},
             onBack = {},
             snackbarHostState = SnackbarHostState(),
         )
@@ -103,6 +111,17 @@ class AllowanceScreenTest {
         compose.onNodeWithText("Save").performClick()
 
         assertThat(saved).isTrue()
+    }
+
+    @Test
+    fun `save is disabled while automatic time is off`() {
+        val draft = Allowances(Allowance.ofMinutes(10), Allowance.BLOCKED)
+        show(state(Allowances.BLOCKED, draft = draft, automaticTimeOn = false))
+
+        compose.onNodeWithText("Save").assertIsNotEnabled()
+        compose
+            .onNodeWithText("Changes can be saved only while automatic date, time and time zone are on.")
+            .assertIsDisplayed()
     }
 
     @Test

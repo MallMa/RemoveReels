@@ -6,12 +6,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-/** A day with its weekday, such as "Tue 3 Nov", in the order the phone's language uses. */
+/** A day with its weekday, such as "Tue 3 Nov", in the order [locale] uses. */
+internal fun LocalDate.formatShort(locale: Locale): String =
+    format(DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEdMMM"), locale))
+
+/** [formatShort] in the phone's language. */
 @Composable
 internal fun shortDate(date: LocalDate): String {
     val locale = LocalConfiguration.current.locales[0]
-    val formatter =
-        remember(locale) { DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEdMMM"), locale) }
-    return date.format(formatter)
+    return remember(date, locale) { date.formatShort(locale) }
 }

@@ -28,6 +28,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -60,6 +61,7 @@ internal fun AllowanceScreen(
     onBlock: (TargetApp) -> Unit,
     onAllow: (TargetApp, Int) -> Unit,
     onSave: () -> Unit,
+    onOpenDateSettings: () -> Unit,
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
@@ -95,7 +97,15 @@ internal fun AllowanceScreen(
                 text = stringResource(R.string.allowance_starts, shortDate(state.startsOn)),
                 style = MaterialTheme.typography.bodyMedium,
             )
-            Button(onClick = onSave, enabled = state.hasChanges, modifier = Modifier.align(Alignment.End)) {
+            if (!state.automaticTimeOn) {
+                Text(
+                    text = stringResource(R.string.allowance_needs_automatic_time),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                TextButton(onClick = onOpenDateSettings) { Text(stringResource(R.string.home_open_date_settings)) }
+            }
+            Button(onClick = onSave, enabled = state.canSave, modifier = Modifier.align(Alignment.End)) {
                 Text(stringResource(R.string.allowance_save))
             }
         }

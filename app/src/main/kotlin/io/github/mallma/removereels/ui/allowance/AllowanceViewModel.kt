@@ -2,6 +2,7 @@ package io.github.mallma.removereels.ui.allowance
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.mallma.removereels.AutomaticTime
 import io.github.mallma.removereels.budget.Allowance
 import io.github.mallma.removereels.budget.Allowances
 import io.github.mallma.removereels.budget.TargetApp
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Clock
 import java.time.LocalDate
@@ -22,8 +24,11 @@ internal data class AllowanceEditorState(
     val saved: Allowances,
     val draft: Allowances,
     val startsOn: LocalDate,
+    val automaticTimeOn: Boolean,
 ) {
     val hasChanges: Boolean get() = draft != saved
+
+    val canSave: Boolean get() = hasChanges && automaticTimeOn
 
     /** Whether [app] can have any time while the other app keeps its draft allowance. */
     fun canAllow(app: TargetApp): Boolean = draft.maximumMinutesFor(app) >= Allowance.STEP_MINUTES
@@ -32,17 +37,24 @@ internal data class AllowanceEditorState(
 internal class AllowanceViewModel(
     private val store: StateStore,
     private val clock: Clock,
+    private val automaticTime: AutomaticTime,
 ) : ViewModel() {
     private val draft = MutableStateFlow<Allowances?>(null)
+    private val refreshes = MutableStateFlow(0)
 
     /** Null until the stored state has been read. */
     val state: StateFlow<AllowanceEditorState?> =
-        combine(store.state, draft) { state, draft ->
+        combine(store.state, draft, refreshes) { state, draft, _ ->
             val today = LocalDate.now(clock)
             val current = state.schedule.allowancesOn(today)
             val saved = state.schedule.changeAfter(today)?.allowances ?: current
-            AllowanceEditorState(current, saved, draft ?: saved, today.plusDays(1))
+            AllowanceEditorState(current, saved, draft ?: saved, today.plusDays(1), automaticTime.isOn())
         }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Reads again what can change outside the app: the date and automatic time. */
+    fun refresh() {
+        refreshes.update { it + 1 }
+    }
 
     fun block(app: TargetApp) = edit { it.with(app, Allowance.BLOCKED) }
 
@@ -64,12 +76,22 @@ internal class AllowanceViewModel(
         }
     }
 
-    /** Saves the draft; like every change, it starts tomorrow. */
-    fun save() {
-        val allowances = state.value?.draft ?: return
+    /**
+     * Saves the draft from the day after today and passes that day to [onSaved]. Refuses while automatic time is off:
+     * saving on a date set by hand would make a scheduled change current on the wrong day, so a raised allowance
+     * could start early and stay.
+     */
+    fun save(onSaved: (startsOn: LocalDate) -> Unit) {
+        val allowances = state.value?.draft
+        if (allowances == null || !automaticTime.isOn()) {
+            refresh()
+            return
+        }
+        val today = LocalDate.now(clock)
         viewModelScope.launch {
-            store.scheduleChange(allowances, LocalDate.now(clock))
+            store.scheduleChange(allowances, today)
             draft.value = null
+            onSaved(today.plusDays(1))
         }
     }
 

@@ -141,6 +141,7 @@
     <string name="allowance_bar_free">free %1$d</string>
     <string name="allowance_bar_description">Instagram %1$d min, YouTube %2$d min, %3$d min free</string>
     <string name="allowance_starts">Changes start tomorrow (%1$s) and stay until you change them again.</string>
+    <string name="allowance_needs_automatic_time">Changes can be saved only while automatic date, time and time zone are on.</string>
     <string name="allowance_save">Save</string>
     <string name="allowance_saved">Saved. It starts tomorrow, %1$s.</string>
 
