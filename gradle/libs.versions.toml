@@ -3,6 +3,7 @@ agp = "9.4.1"
 kotlin = "2.4.21"
 # 2.0 is still an alpha, but detekt 1.x does not support Kotlin 2.4.
 detekt = "2.0.0-alpha.6"
+kover = "0.9.11"
 ktlint = "1.8.0"
 spotless = "8.10.4"
 
@@ -12,32 +13,63 @@ androidMinSdk = "33"
 
 androidxActivity = "1.13.0"
 androidxComposeBom = "2026.09.00"
+androidxCore = "1.19.1"
+androidxDatastore = "1.3.0"
+androidxLifecycle = "2.11.0"
+androidxNavigation = "2.10.2"
+androidxSavedstate = "1.5.0"
 androidxTestEspresso = "3.7.0"
 androidxTestExtJunit = "1.3.0"
+androidxWork = "2.12.0"
+junit = "6.1.3"
 junit4 = "4.13.2"
+kotlinxCoroutines = "1.11.0"
+kotlinxSerialization = "1.12.0"
 robolectric = "4.17"
+truth = "1.4.5"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivity" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidxComposeBom" }
+androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "androidxDatastore" }
+androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime", version.ref = "androidxLifecycle" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigation" }
+androidx-savedstate = { module = "androidx.savedstate:savedstate", version.ref = "androidxSavedstate" }
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidxTestEspresso" }
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
+androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "androidxWork" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+truth = { module = "com.google.truth:truth", version.ref = "truth" }
 
 # Used by build-logic
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kover-gradlePlugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
 # Convention plugins from build-logic
 removereels-android-application = { id = "removereels.android.application" }
+removereels-jvm-library = { id = "removereels.jvm.library" }

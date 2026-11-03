@@ -1,6 +1,6 @@
 # RemoveReels: MVP plan
 
-Status: planning · Last updated: 2026-11-01
+Status: M0 to M4 done, M5 next · Last updated: 2026-11-03
 
 ## 1. Product
 
@@ -32,7 +32,7 @@ published on Google Play.
 | Changes start tomorrow | Every change, up or down, takes effect at the next local midnight and stays until changed again. Today's allowance never changes. |
 | No off switch | The app has no setting that pauses or disables blocking, for either app. Uninstalling is the only way to stop it. |
 | System switch | Android always lets the user turn an accessibility service off. If that happens, a notification says blocking is off until it is turned back on. |
-| Automatic time required | Allowances apply only while Android's *automatic date & time* is on. Otherwise both apps are fully blocked, which closes the "change the date" loophole. |
+| Automatic time required | Allowances apply only while Android's *automatic date & time* and *automatic time zone* are on. Otherwise both apps are fully blocked, which closes the "change the date" and "change the time zone" loopholes (ADR 0007). |
 | What counts | Time while a Reels or Shorts screen is visible, the screen is on and that app is in front. |
 
 Consequences worth knowing:
@@ -67,11 +67,18 @@ Enforcer
 **Detection.** Each app builds its screens from views with internal ids (Instagram calls Reels "clips" internally).
 The detector looks ids up directly instead of walking the whole screen, which keeps it fast and light on battery. A
 match only counts when the view is visible and covers most of the screen, so a thumbnail in the feed never triggers a
-block. The real ids are recorded from a device in milestone M1; the rule lists are data (`rules/*.json`), not code.
+block. The rule lists are data
+([`detection/src/main/resources/.../rules`](../detection/src/main/resources/io/github/mallma/removereels/detection/rules)),
+not code, and are tested against screens recorded on a phone
+([`detection/src/test/resources/fixtures`](../detection/src/test/resources/fixtures)). Instagram 453 marks every Reels
+viewer with `clips_viewer_view_pager`, and a Reel opened from a chat also shows `sender_profile_pic`; stories use
+different `reel_viewer_*` ids and stay untouched. YouTube 21.38 marks the Shorts player with `reel_recycler` and
+`reel_watch_player`. Debug builds can record new screens through adb; see `SnapshotRecorder`.
 
-**Canaries.** Each rule list also names an element that should always exist on the app's main screen, such as the
-Reels tab button. If the main screen appears without it, the app's layout has probably changed and the rules are
-stale, and RemoveReels says so instead of failing silently.
+**Canaries.** A rule list can also name an element that should always appear with the app's main screen, such as the
+Reels tab button next to Instagram's tab bar. If the main screen appears without it, the app's layout has probably
+changed and the rules are stale, and RemoveReels says so instead of failing silently. YouTube's tab bar items have no
+view ids, so YouTube has no canary; its fixture tests are the safety net.
 
 | | Instagram | YouTube |
 |---|---|---|
@@ -96,7 +103,7 @@ stale, and RemoveReels says so instead of failing silently.
 | Dependency injection | A small hand-written `AppContainer` | About a dozen objects; manual wiring is explicit and has no build cost. | Hilt, Koin. |
 | Navigation | Navigation Compose with type-safe routes | Standard, small. | Hand-rolled. |
 | Time | `java.time.Clock` (wall time) and `kotlin.time.TimeSource` (monotonic), both injected | Correct midnights and time zones; sessions immune to clock changes; deterministic tests. | `System.currentTimeMillis()`. |
-| SDK levels | minSdk 33, target/compile 37 (Android 17) | Android 13+ removes compatibility branches (node recycling, notification permission checks, install-source API, per-app language). Lowered only if the author's phone needs it. | minSdk 26 (more legacy code paths for users the project does not target). |
+| SDK levels | minSdk 33, target/compile 37 (Android 17) | Android 13+ removes compatibility branches (node recycling, notification permission checks, install-source API, per-app language). The author's phone runs Android 13 or newer. | minSdk 26 (more legacy code paths for users the project does not target). |
 | Permissions | Accessibility binding, `POST_NOTIFICATIONS`, `<queries>` for the two packages. **No `INTERNET`.** | An app that can see screens should be unable to send anything; Android enforces it. | |
 | Distribution | Release APK on GitHub Releases, installed with `adb` or Android Studio | Personal use; no store review. | Google Play, F-Droid. |
 
@@ -123,8 +130,9 @@ Core model (`:budget`):
 - `Allowance`: blocked, or 5–45 minutes in steps of 5.
 - `Allowances`: one per app; construction fails if the sum exceeds 45 minutes.
 - `AllowanceSchedule`: today's allowances plus an optional change effective from a given date. `scheduleChange(new, today)` always sets the effective date to `today + 1`.
-- `UsageLedger`: seconds watched per app per date; keeps seven days.
-- `BlockPolicy.decide(app, now, schedule, ledger, autoTimeOn)` → `Allow(remaining)` or `Block(reason)`.
+- `UsageLedger`: time watched per app per date; keeps seven days.
+- `BlockPolicy.decide(app, today, schedule, ledger, automaticTimeOn)` → `Allow(remaining)` or `Block(reason)`.
+- `WatchTimer`: measures watching time on a monotonic clock, so changing the wall clock adds or removes nothing.
 
 ## 6. UI/UX
 
@@ -184,7 +192,7 @@ Turn on                          Try it
 
 - **Welcome** states the no-off-switch rule up front, so it is a choice, not a surprise.
 - **Notifications** asks for the notification permission and explains its single use: telling you when blocking is off.
-- **Turn on** opens our entry in Accessibility settings. If the APK was installed from a downloaded file, Android 13+
+- **Turn on** opens Android's Accessibility settings; apps cannot open their own entry there directly. If the APK was installed from a downloaded file, Android 13+
   greys out the switch ("restricted setting"); the app detects the install source and shows the extra step first:
   App info → ⋮ → Allow restricted settings.
 - **Phone maker** appears only on brands known to stop background services (Xiaomi, Oppo, Vivo, Huawei, Samsung) and
@@ -218,7 +226,7 @@ Turn on                          Try it
 ```
 
 Card states: *blocked* · *X of Y min left* · *used up today* · *not installed* · *rules may be out of date*
-(canary failed). A banner explains when automatic date & time is off: "Allowances need automatic date & time. Until
+(canary failed). A banner explains when automatic date, time or time zone is off: "Allowances need automatic date, time and time zone. Until
 it's on, Reels and Shorts stay blocked."
 
 ### Daily allowance
@@ -305,7 +313,8 @@ About                           ›   version, source code, licences,
                                     tested app versions (Instagram 4xx ✓)
 ```
 
-Debug builds add a **Detection log**: the last detections and canary results with view ids only, used to fix rules.
+Debug builds can record the current screen through adb (`SnapshotRecorder`), with view ids, classes and bounds only,
+to update the rules and their fixtures.
 
 ### Notification
 
@@ -327,7 +336,8 @@ accessibility service is off; it opens the *Turn on* screen.
 
 ## 8. Milestones
 
-Each milestone is a series of small pull requests; see [engineering.md](engineering.md).
+Each milestone is a series of small commits; see [engineering.md](engineering.md). M1 to M4 landed together in one
+pull request.
 
 | Milestone | Scope | Done when |
 |---|---|---|
@@ -338,7 +348,9 @@ Each milestone is a series of small pull requests; see [engineering.md](engineer
 | M4 Interface | Onboarding, Home, Daily allowance, Settings, notification | Install to "it works" in under two minutes |
 | M5 Release | Device checks, battery, accessibility pass, README screenshots, v1.0.0 | Every row in section 7 passes |
 
-M1 needs the phone connected over USB with Instagram and YouTube installed.
+M1 to M4 were checked on the author's phone: every recorded entry point is detected, the Reels and Shorts tabs are
+blocked, the timer pill counts down, and onboarding runs to a working block. Two "done when" targets are measured in
+M5 with the other device checks: a day of normal use without false hits, and the speed target.
 
 ## 9. Risks
 
@@ -348,8 +360,3 @@ M1 needs the phone connected over USB with Instagram and YouTube installed.
 | A/B tests show different layouts | Rules allow alternative signals; new fixtures when a variant appears |
 | The phone stops the service | Phone-maker guide, 15-minute check and notification |
 | Accessibility API behaviour changes in a new Android version | Target the newest SDK, test on Android betas before they ship |
-
-## 10. Open decisions
-
-- **License.** GPL-3.0-or-later keeps derivatives open; MIT or Apache-2.0 is more common for portfolio projects.
-- **minSdk.** 33 unless the author's phone runs an older Android version.

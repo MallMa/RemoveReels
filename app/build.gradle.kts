@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.removereels.android.application)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -13,15 +14,31 @@ android {
 }
 
 dependencies {
+    implementation(project(":budget"))
+    implementation(project(":detection"))
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.savedstate)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.junit4)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
+    testImplementation(libs.truth)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     constraints {

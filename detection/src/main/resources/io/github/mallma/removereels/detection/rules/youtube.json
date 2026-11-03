@@ -1,0 +1,14 @@
+{
+  "packageName": "com.google.android.youtube",
+  "testedVersion": "21.38.130",
+  "surfaces": [
+    {
+      "name": "shorts",
+      "anyOf": [
+        { "viewId": "reel_recycler", "minScreenShare": 0.5 },
+        { "viewId": "reel_watch_player", "minScreenShare": 0.5 },
+        { "viewId": "reel_player_page_container", "minScreenShare": 0.5 }
+      ]
+    }
+  ]
+}

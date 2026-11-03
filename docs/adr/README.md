@@ -11,3 +11,4 @@ it. Records are never rewritten; a changed decision gets a new record that super
 | [0004](0004-typed-datastore-with-kotlinx-serialization.md) | Typed DataStore with kotlinx.serialization | Accepted |
 | [0005](0005-manual-dependency-injection.md) | Manual dependency injection | Accepted |
 | [0006](0006-quality-gates.md) | Quality gates and their tools | Accepted |
+| [0007](0007-allowances-need-automatic-time-zone.md) | Allowances also need the automatic time zone | Accepted |

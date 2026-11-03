@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launcher icon's struck-through play button, cut to the notification icon's frame. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="54"
+    android:viewportHeight="54">
+    <group
+        android:translateX="-27"
+        android:translateY="-27">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M45,39 L45,69 L71,54 Z" />
+        <path
+            android:pathData="M35,35 L73,73"
+            android:strokeWidth="5"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeLineCap="round" />
+    </group>
+</vector>

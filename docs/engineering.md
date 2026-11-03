@@ -37,8 +37,8 @@ All checks run in CI, all must pass, and none has a baseline: the project starts
 
 | Where | How |
 |---|---|
-| `:detection`, `:budget` | JUnit 5 + Truth. Table-driven where it helps. Kover enforces at least 90 % line coverage. |
-| Detection rules | Fixture tests: recorded screens (`uiautomator dump`) per app version, with every text and description stripped by a sanitiser script so no personal data is committed. Each rule has screens that must match and screens that must not. |
+| `:detection`, `:budget` | JUnit Jupiter 6 + Truth. Table-driven where it helps. Kover enforces at least 90 % line coverage. |
+| Detection rules | Fixture tests: screens recorded per app version by the debug build's `SnapshotRecorder`, which never reads text or descriptions, so no personal data is committed. Each surface has screens that must match, and screens that must not match sit in `none` folders. |
 | `:app` ViewModels | JVM tests with fakes and `kotlinx-coroutines-test`. |
 | `:app` UI | Compose UI tests on Robolectric, so CI needs no emulator. The allowance editor's 45-minute logic is covered here. |
 | On the phone | A short manual checklist per release: every entry point from the plan, plus messages, posting and normal videos. |

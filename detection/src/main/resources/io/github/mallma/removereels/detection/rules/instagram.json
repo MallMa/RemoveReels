@@ -1,0 +1,26 @@
+{
+  "packageName": "com.instagram.android",
+  "testedVersion": "453.0.0.57.79",
+  "surfaces": [
+    {
+      "name": "reels_from_messages",
+      "anyOf": [
+        { "viewId": "clips_viewer_view_pager", "minScreenShare": 0.5 },
+        { "viewId": "clips_viewer_container", "minScreenShare": 0.5 }
+      ],
+      "allOf": [
+        { "viewId": "sender_profile_pic" }
+      ],
+      "openedFromMessages": true
+    },
+    {
+      "name": "reels",
+      "anyOf": [
+        { "viewId": "clips_viewer_view_pager", "minScreenShare": 0.5 },
+        { "viewId": "clips_viewer_container", "minScreenShare": 0.5 }
+      ]
+    }
+  ],
+  "canary": { "anchorViewId": "tab_bar", "expectedViewId": "clips_tab" },
+  "homeTabViewId": "feed_tab"
+}
