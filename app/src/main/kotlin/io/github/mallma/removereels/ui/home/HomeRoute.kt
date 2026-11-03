@@ -13,7 +13,7 @@ import io.github.mallma.removereels.ui.openDateSettings
 
 /** [HomeScreen] with its view model; re-reads the system state whenever the screen comes back into view. */
 @Composable
-internal fun HomeRoute() {
+internal fun HomeRoute(onOpenAllowance: () -> Unit) {
     val context = LocalContext.current
     val viewModel =
         viewModel {
@@ -33,6 +33,7 @@ internal fun HomeRoute() {
             state = it,
             onTurnOn = context::openAccessibilitySettings,
             onOpenDateSettings = context::openDateSettings,
+            onOpenAllowance = onOpenAllowance,
         )
     }
 }

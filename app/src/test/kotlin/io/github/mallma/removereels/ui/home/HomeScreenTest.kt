@@ -35,7 +35,10 @@ class HomeScreenTest {
     private fun show(
         state: HomeState,
         onTurnOn: () -> Unit = {},
-    ) = compose.setContent { HomeScreen(state, onTurnOn = onTurnOn, onOpenDateSettings = {}) }
+        onOpenAllowance: () -> Unit = {},
+    ) = compose.setContent {
+        HomeScreen(state, onTurnOn = onTurnOn, onOpenDateSettings = {}, onOpenAllowance = onOpenAllowance)
+    }
 
     @Test
     fun `shows that blocking is on and each app's state`() {
@@ -49,11 +52,24 @@ class HomeScreenTest {
     }
 
     @Test
+    fun `opens the daily allowance`() {
+        var opened = false
+        show(HomeState(blockingOn = true, automaticTimeOn = true, cards = listOf(instagramBlocked)), onOpenAllowance = {
+            opened = true
+        })
+
+        compose.onNodeWithText("Daily allowance").performClick()
+
+        assertThat(opened).isTrue()
+    }
+
+    @Test
     fun `offers to turn blocking back on`() {
         var turnedOn = false
         show(
             HomeState(blockingOn = false, automaticTimeOn = true, cards = listOf(instagramBlocked)),
-        ) { turnedOn = true }
+            onTurnOn = { turnedOn = true },
+        )
 
         compose.onNodeWithText("Blocking is off").assertIsDisplayed()
         compose.onNodeWithText("Turn on").performClick()

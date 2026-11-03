@@ -6,4 +6,7 @@ import kotlinx.serialization.Serializable
 internal sealed interface Route {
     @Serializable
     data object Home : Route
+
+    @Serializable
+    data object Allowance : Route
 }

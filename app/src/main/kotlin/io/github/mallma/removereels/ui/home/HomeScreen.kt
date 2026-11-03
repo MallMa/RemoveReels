@@ -38,6 +38,7 @@ internal fun HomeScreen(
     state: HomeState,
     onTurnOn: () -> Unit,
     onOpenDateSettings: () -> Unit,
+    onOpenAllowance: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -62,6 +63,9 @@ internal fun HomeScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+            Button(onClick = onOpenAllowance, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text(stringResource(R.string.home_daily_allowance))
             }
         }
     }

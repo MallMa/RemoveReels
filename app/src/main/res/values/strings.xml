@@ -22,6 +22,34 @@
     <string name="home_from_tomorrow_blocked">From tomorrow: blocked</string>
     <string name="home_rules_stale">This app may have changed. Some of its screens may not be blocked until RemoveReels is updated.</string>
     <string name="home_today_total">Today: %1$d of %2$d min · resets at midnight</string>
+    <string name="home_daily_allowance">Daily allowance</string>
+
+    <!-- Daily allowance -->
+    <string name="navigate_back">Back</string>
+    <string name="allowance_title">Daily allowance</string>
+    <string name="allowance_today">Today</string>
+    <string name="allowance_from_tomorrow">From tomorrow</string>
+    <!-- For example "Instagram Reels" -->
+    <string name="allowance_app_surface">%1$s %2$s</string>
+    <string name="allowance_blocked">blocked</string>
+    <string name="allowance_minutes">%1$d min</string>
+    <string name="allowance_block_completely">Block completely</string>
+    <string name="allowance_allow">Allow</string>
+    <string name="allowance_lower_other_first">Lower %1$s\'s allowance first.</string>
+    <!-- Read by TalkBack, for example "Instagram Reels from tomorrow, 20 minutes, maximum 30" -->
+    <string name="allowance_slider_description">%1$s from tomorrow</string>
+    <plurals name="allowance_slider_state">
+        <item quantity="one">%1$d minute, maximum %2$d</item>
+        <item quantity="other">%1$d minutes, maximum %2$d</item>
+    </plurals>
+    <string name="allowance_shared_maximum">Shared daily maximum: %1$d min</string>
+    <string name="allowance_bar_instagram">IG %1$d</string>
+    <string name="allowance_bar_youtube">YT %1$d</string>
+    <string name="allowance_bar_free">free %1$d</string>
+    <string name="allowance_bar_description">Instagram %1$d min, YouTube %2$d min, %3$d min free</string>
+    <string name="allowance_starts">Changes start tomorrow (%1$s) and stay until you change them again.</string>
+    <string name="allowance_save">Save</string>
+    <string name="allowance_saved">Saved. It starts tomorrow, %1$s.</string>
 
     <!-- Block card -->
     <string name="block_title_instagram">Reels are blocked</string>
