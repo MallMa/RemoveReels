@@ -7,6 +7,12 @@
     <string name="surface_instagram">Reels</string>
     <string name="surface_youtube">Shorts</string>
 
+    <!-- Notification -->
+    <string name="notification_channel">Blocking status</string>
+    <string name="notification_channel_description">Tells you when blocking is off.</string>
+    <string name="notification_blocking_off">Blocking is off</string>
+    <string name="notification_tap_to_turn_on">Tap to turn it back on.</string>
+
     <!-- Home -->
     <string name="home_blocking_on">Blocking is on</string>
     <string name="home_blocking_off">Blocking is off</string>
