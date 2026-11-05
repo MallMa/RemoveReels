@@ -10,12 +10,14 @@ import io.github.mallma.removereels.container
  */
 class BlockingService : AccessibilityService() {
     private val recorder = SnapshotRecorder(this)
+    private val probe = CoverProbe(this)
     private var host: GuardHost? = null
     private val notification by lazy { BlockingOffNotification(this) }
 
     override fun onServiceConnected() {
         host = GuardHost(this, container).also { it.start() }
         recorder.start()
+        probe.start()
         container.guardStatus.serviceConnected()
         notification.update(blockingOn = true)
         BlockingCheckWorker.schedule(this)
@@ -23,6 +25,7 @@ class BlockingService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         host?.onEvent(windowChanged = event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
+        probe.onEvent(event)
     }
 
     override fun onInterrupt() = Unit
@@ -31,6 +34,7 @@ class BlockingService : AccessibilityService() {
         container.guardStatus.serviceDisconnected()
         notification.update(blockingOn = false)
         recorder.stop()
+        probe.stop()
         host?.stop()
         host = null
         super.onDestroy()
