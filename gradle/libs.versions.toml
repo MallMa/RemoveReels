@@ -1,11 +1,11 @@
 [versions]
-agp = "9.5.0"
+agp = "9.5.1"
 kotlin = "2.4.21"
 # 2.0 is still an alpha, but detekt 1.x does not support Kotlin 2.4.
 detekt = "2.0.0-alpha.6"
 kover = "0.9.11"
 ktlint = "1.8.0"
-spotless = "8.10.4"
+spotless = "8.11.0"
 
 androidCompileSdk = "37"
 androidTargetSdk = "37"
