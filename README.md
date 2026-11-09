@@ -12,7 +12,8 @@ is next.
 
 - [MVP plan](docs/mvp-plan.md): product rules, how blocking works, tech stack, architecture, UI/UX, milestones.
 - [Engineering standards](docs/engineering.md): code quality rules, tests, commits, CI.
-- [Hiding plan](docs/hiding-plan.md): the next feature, which hides the Reels and Shorts entry points themselves.
+- [Hiding plan](docs/hiding-plan.md): the next feature, which hides the Reels and Shorts entry points that stay in
+  place.
 - [Architecture decisions](docs/adr/README.md): why the project is built the way it is.
 
 ## How it works
