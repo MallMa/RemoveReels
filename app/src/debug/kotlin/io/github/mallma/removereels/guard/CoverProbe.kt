@@ -30,6 +30,7 @@ import java.io.File
  * - `draw`: `windows` is one touchable window per cover, as in H1; `pass` the same windows letting touches through;
  *   `canvas` one window over the whole screen that draws every cover and lets touches through.
  * - `measure`: also reads the position on every frame, only to measure how far the covers are from it.
+ * - `cover`: `tiles` covers each Reels tile; `grid` covers a whole grid that shows any.
  */
 internal class CoverProbe(
     private val service: AccessibilityService,
@@ -52,6 +53,7 @@ internal class CoverProbe(
                             name = intent.getStringExtra("name").orEmpty().ifEmpty { "probe" },
                             track = Track.valueOf(track.uppercase()),
                             measure = intent.getBooleanExtra("measure", false),
+                            wholeGrid = intent.getStringExtra("cover") == "grid",
                             covers = coversFor(Draw.valueOf(draw.uppercase())),
                         ),
                     )
@@ -64,8 +66,11 @@ internal class CoverProbe(
             override fun doFrame(frameTimeNanos: Long) {
                 val run = run ?: return
                 val tracking = run.isTracking()
-                if (tracking || run.measure) {
-                    onFrame(run, tracking)
+                when {
+                    run.changed -> find(run)
+                    tracking || run.measure -> onFrame(run, tracking)
+                }
+                if (run.needsFrames()) {
                     choreographer.postFrameCallback(this)
                 } else {
                     run.looping = false
@@ -91,31 +96,31 @@ internal class CoverProbe(
     fun onEvent(event: AccessibilityEvent) {
         val run = run
         val kind = EVENT_KINDS[event.eventType]
-        if (run != null && kind != null && event.packageName == INSTAGRAM) onEvent(run, kind, event.scrollDeltaY)
+        if (run != null && kind != null && event.packageName == INSTAGRAM) {
+            run.sample(kind, trueTop = null, micros = 0, event.scrollDeltaY)
+            run.changed = true
+            run.trackUntil = SystemClock.uptimeMillis() + IDLE_MS
+            loop(run)
+        }
     }
 
-    /** Finds the targets again, moves the covers onto them, and follows them frame by frame for a while. */
-    private fun onEvent(
-        run: Run,
-        kind: String,
-        scrollDy: Int,
-    ) {
+    /** Finds the targets again on the next frame after events, however many arrived, and moves the covers onto them. */
+    private fun find(run: Run) {
+        run.changed = false
         val started = SystemClock.elapsedRealtimeNanos()
-        val targets = ProbeTargets.find(service)
+        val targets = ProbeTargets.find(service, run.wholeGrid)
         val micros = (SystemClock.elapsedRealtimeNanos() - started) / NANOS_PER_MICRO
         run.queries += targets.queries
         run.queryMicros += micros
-        run.sample(kind, targets.anchorBounds?.top, micros, scrollDy)
+        run.sample("find", targets.anchorBounds?.top, micros, scrollDy = 0)
         run.targets = targets
         run.shownTop = targets.anchorBounds?.top
         run.lastAnchor = targets.anchorBounds
         run.covers.show(targets.visibleRects())
-        run.trackUntil = SystemClock.uptimeMillis() + IDLE_MS
-        loop(run)
     }
 
     private fun loop(run: Run) {
-        if (!run.looping && (run.isTracking() || run.measure)) {
+        if (!run.looping && run.needsFrames()) {
             run.looping = true
             choreographer.postFrameCallback(frame)
         }
@@ -192,6 +197,7 @@ internal class CoverProbe(
         val name: String,
         val track: Track,
         val measure: Boolean,
+        val wholeGrid: Boolean,
         val covers: ProbeCovers,
     ) {
         val samples = StringBuilder("kind,uptime_ms,true_top,shown_top,query_us,scroll_dy\n")
@@ -203,9 +209,14 @@ internal class CoverProbe(
 
         /** Until when `frames` follows the screen frame by frame: shortly after the last event or movement. */
         var trackUntil = 0L
+
+        /** Events arrived since the targets were last found. */
+        var changed = false
         var looping = false
         var queries = 0
         var queryMicros = 0L
+
+        fun needsFrames(): Boolean = changed || isTracking() || measure
 
         fun isTracking(): Boolean =
             when (track) {

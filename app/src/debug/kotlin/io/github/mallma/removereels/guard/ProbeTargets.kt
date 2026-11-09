@@ -24,40 +24,40 @@ internal data class ProbeTargets(
     companion object {
         private const val INSTAGRAM = "com.instagram.android"
         private const val EXTENSION = 4000
+        private val TILE_IDS = listOf("grid_card_layout_container", "layout_container")
 
-        /** Reels tiles in a grid: the grid's children with a play count. The Reels tab: the second tab on profiles. */
-        fun find(service: AccessibilityService): ProbeTargets {
-            var queries = 1
-            val root = service.rootInActiveWindow ?: return ProbeTargets(emptyList(), null, null, Rect(), queries)
-            val targets = mutableListOf<AccessibilityNodeInfo>()
-            var container = root.boundsInScreen().toRect()
-            val grids = root.findAccessibilityNodeInfosByViewId("$INSTAGRAM:id/recycler_view")
-            for (grid in grids.filter { it.isVisibleToUser }) {
-                container = grid.boundsInScreen().toRect()
-                for (index in 0 until grid.childCount) {
-                    val tile = grid.getChild(index) ?: continue
-                    queries++
-                    if (tile.isVisibleToUser && tile.hasChildWithId("$INSTAGRAM:id/play_count_container")) {
-                        targets += tile
-                    }
-                }
-            }
-            val rows = root.findAccessibilityNodeInfosByViewId("$INSTAGRAM:id/profile_tab_layout")
-            rows.firstOrNull { it.isVisibleToUser }?.let { row -> reelsTab(row)?.let(targets::add) }
-            queries += 2
+        /**
+         * Reels tiles in a grid: tiles with a play count inside them. The Reels tab: the second tab on profiles. Each
+         * lookup by view id is one request to Instagram, and so is each child asked for one by one, so tiles and play
+         * counts are looked up by id and matched by their bounds here.
+         */
+        fun find(
+            service: AccessibilityService,
+            wholeGrid: Boolean,
+        ): ProbeTargets {
+            val root = service.rootInActiveWindow ?: return ProbeTargets(emptyList(), null, null, Rect(), queries = 1)
+            val grid = root.byId("recycler_view").firstOrNull { it.isVisibleToUser }
+            val container = (grid ?: root).boundsInScreen().toRect()
+            val playCounts = root.byId("play_count_container").map { it.boundsInScreen().toRect() }
+            val tiles = TILE_IDS.flatMap { root.byId(it) }.filter { it.isVisibleToUser }
+            val reels = tiles.filter { tile -> tile.boundsInScreen().toRect().let { b -> playCounts.any(b::contains) } }
+            val tab = root.byId("profile_tab_layout").firstOrNull { it.isVisibleToUser }?.let(::reelsTab)
+            val targets = reels + listOfNotNull(tab)
             val bounds = targets.map { it.boundsInScreen().toRect() }
             val anchor = bounds.indices.minByOrNull { abs(bounds[it].centerY() - container.centerY()) }
+            // Explore's grid shows little but Reels; covering all of it needs no following at all.
+            val covered = if (wholeGrid && grid != null && reels.isNotEmpty()) listOf(container) else bounds
             return ProbeTargets(
-                rects = bounds.map { it.extendedOver(container) },
+                rects = covered.map { it.extendedOver(container) },
                 anchor = anchor?.let(targets::get),
                 anchorBounds = anchor?.let(bounds::get),
                 container = container,
-                queries = queries,
+                queries = 2 + TILE_IDS.size + 1 + (if (tab != null) 2 else 0),
             )
         }
 
-        private fun AccessibilityNodeInfo.hasChildWithId(viewId: String): Boolean =
-            (0 until childCount).any { getChild(it)?.viewIdResourceName == viewId }
+        private fun AccessibilityNodeInfo.byId(id: String): List<AccessibilityNodeInfo> =
+            findAccessibilityNodeInfosByViewId("$INSTAGRAM:id/$id")
 
         /** The tab row holds one strip of tabs: Posts, Reels, then the others. */
         private fun reelsTab(row: AccessibilityNodeInfo): AccessibilityNodeInfo? {
