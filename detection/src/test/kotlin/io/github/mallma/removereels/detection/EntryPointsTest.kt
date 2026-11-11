@@ -134,6 +134,30 @@ class EntryPointsTest {
     }
 
     @Test
+    fun `asks the app for the views a region depends on only while the region shows`() {
+        val asked = mutableListOf<String>()
+        val recorded = screenWith(emptyList())
+        val tree =
+            object : ScreenTree {
+                override val screen = recorded.screen
+
+                override fun findByViewId(viewId: String): List<ScreenNode> =
+                    recorded.findByViewId(viewId).also { asked += viewId }
+            }
+        val rules =
+            AppRules(
+                APP,
+                "1.0",
+                listOf(SurfaceRule("viewer", listOf(Signal("player")))),
+                entryPoints = listOf(wholeGrid),
+            )
+
+        SurfaceDetector(listOf(rules)).findEntryPoints(APP, tree)
+
+        assertThat(asked).containsExactly("$APP:id/grid")
+    }
+
+    @Test
     fun `rejects blank ids to contain or to start below`() {
         assertThrows<IllegalArgumentException> { EntryPointRule("grid", "grid", containing = " ") }
         assertThrows<IllegalArgumentException> { EntryPointRule("grid", "grid", below = "") }
