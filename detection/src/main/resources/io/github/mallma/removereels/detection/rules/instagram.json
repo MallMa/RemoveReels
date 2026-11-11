@@ -36,5 +36,8 @@
       "below": "explore_action_bar",
       "coverColor": { "light": "#FFFFFF", "dark": "#0C1014" }
     }
+  ],
+  "reelsPages": [
+    { "name": "profile_reels", "viewId": "clips_grid_recyclerview", "pager": "profile_viewpager" }
   ]
 }
