@@ -47,6 +47,18 @@ public class SurfaceDetector(
         return rules.entryPoints.flatMap { rules.find(it, tree) }
     }
 
+    /** The page that lists only Reels [tree], a screen of [packageName], shows; null if it shows none. */
+    public fun findReelsPage(
+        packageName: String,
+        tree: ScreenTree,
+    ): ReelsPageRule? {
+        val rules = rulesByPackage[packageName] ?: return null
+        return rules.reelsPages.firstOrNull { page ->
+            val pagers = rules.visibleBounds(page.pager, tree)
+            rules.visibleBounds(page.viewId, tree).any { list -> pagers.any { list in it } }
+        }
+    }
+
     public fun checkCanary(
         packageName: String,
         tree: ScreenTree,

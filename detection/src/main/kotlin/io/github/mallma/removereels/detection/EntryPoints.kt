@@ -45,6 +45,22 @@ public data class EntryPointRule(
     }
 }
 
+/**
+ * A page that lists only Reels, such as the Reels tab of a profile, marked by its list [viewId] showing inside the
+ * [pager] that holds the tabs' pages. While the app is blocked, the pager is turned back to the page before.
+ */
+@Serializable
+public data class ReelsPageRule(
+    public val name: String,
+    public val viewId: String,
+    public val pager: String,
+) {
+    init {
+        require(name.isNotBlank()) { "A Reels page needs a name" }
+        require(viewId.isNotBlank() && pager.isNotBlank()) { "Reels page $name needs the view ids of list and pager" }
+    }
+}
+
 /** A colour in the app's light theme and in its dark theme, each written as `#RRGGBB`. */
 @Serializable
 public data class CoverColor(
