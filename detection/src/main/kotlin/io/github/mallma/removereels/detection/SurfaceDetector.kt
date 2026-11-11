@@ -80,10 +80,18 @@ public class SurfaceDetector(
         tree: ScreenTree,
     ): List<EntryPoint> {
         val containers = rule.within?.let { within -> visibleBounds(within, tree) }
+        val contents = rule.containing?.let { containing -> visibleBounds(containing, tree) }
+        val floor =
+            rule.below?.let { below ->
+                visibleBounds(below, tree).maxOfOrNull { it.bottom }
+                    ?: return emptyList()
+            }
         val marks =
             tree
                 .findByViewId(fullViewId(rule.viewId))
-                .filter { it.isVisibleToUser && (containers == null || containers.any { area -> it.bounds in area }) }
+                .filter { it.isVisibleToUser }
+                .filter { mark -> containers == null || containers.any { mark.bounds in it } }
+                .filter { mark -> contents == null || contents.any { it in mark.bounds } }
                 .sortedWith(compareBy({ it.bounds.left }, { it.bounds.top }))
         val chosen =
             when {
@@ -93,6 +101,7 @@ public class SurfaceDetector(
             }
         return chosen
             .mapNotNull { it.ancestor(rule.coverParent)?.bounds?.intersect(tree.screen) }
+            .map { if (floor == null) it else it.copy(top = maxOf(it.top, floor)) }
             .filter { it.area > 0 }
             .map { EntryPoint(rule.name, it, rule.coverColor, rule.coverInsetTopDp) }
     }

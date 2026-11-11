@@ -62,7 +62,8 @@ class BundledRulesTest {
                 .flatMap { app ->
                     val signals = app.surfaces.flatMap { it.anyOf + it.allOf }.map { it.viewId }
                     val canary = listOfNotNull(app.canary?.anchorViewId, app.canary?.expectedViewId)
-                    val entryPoints = app.entryPoints.flatMap { listOfNotNull(it.viewId, it.within) }
+                    val entryPoints =
+                        app.entryPoints.flatMap { listOfNotNull(it.viewId, it.within, it.containing, it.below) }
                     (signals + canary + entryPoints + listOfNotNull(app.homeTabViewId)).map(app::fullViewId)
                 }.toSet()
 
