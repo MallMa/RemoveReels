@@ -8,6 +8,7 @@ import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.budget.WatchTimer
 import io.github.mallma.removereels.detection.CanaryResult
 import io.github.mallma.removereels.detection.EntryPoint
+import io.github.mallma.removereels.detection.ReelsPageRule
 import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.storage.StateStore
 import kotlinx.coroutines.flow.first
@@ -17,14 +18,15 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * A target app in front with the screen on: the blocked surface it shows, if any, its entry points to that surface, and
- * its canary's result.
+ * A target app in front with the screen on: the blocked surface it shows, if any, its entry points to that surface, the
+ * page it shows that lists only Reels, if any, and its canary's result.
  */
 internal data class Screen(
     val app: TargetApp,
     val surface: SurfaceRule?,
     val canary: CanaryResult = CanaryResult.NOT_APPLICABLE,
     val entryPoints: List<EntryPoint> = emptyList(),
+    val reelsPage: ReelsPageRule? = null,
 )
 
 /** What the guard asks the accessibility service to do. */
@@ -48,6 +50,12 @@ internal interface GuardActions {
 
     /** Covers exactly [entryPoints]; none removes every cover. */
     fun cover(entryPoints: List<EntryPoint>)
+
+    /** Turns the pager of [page], a page of [app] that lists only Reels, back to the page before. */
+    fun leave(
+        app: TargetApp,
+        page: ReelsPageRule,
+    )
 }
 
 /**
@@ -76,6 +84,9 @@ internal class Guard(
     var isCovering: Boolean = false
         private set
 
+    /** The Reels page last left and still in view, which is not left again; see [leaveReelsPage]. */
+    private var leftPage: ReelsPageRule? = null
+
     /**
      * [screen] is null when no target app is in front or the screen is off; neither counts as watching. Throws an
      * [java.io.IOException] if the stored state cannot be read or saved.
@@ -91,7 +102,9 @@ internal class Guard(
             // Counted after the session has ended, so that a failed write cannot keep it running.
             count(watched, today, watchedTime, saveNow = !stillWatching)
         }
-        coverEntryPoints(screen, today)
+        val blocked = screen != null && surface == null && decision(screen.app, today) is Decision.Block
+        coverEntryPoints(screen, blocked)
+        leaveReelsPage(screen, blocked)
         if (surface == null) {
             actions.surfaceGone()
         } else {
@@ -101,17 +114,29 @@ internal class Guard(
     }
 
     /**
-     * Covers the entry points while the app is blocked (ADR 0008). With allowance left they stay visible, and over a
+     * Covers the entry points while the app is [blocked] (ADR 0008). With allowance left they stay visible, and over a
      * blocked surface the block card shows instead.
      */
-    private suspend fun coverEntryPoints(
+    private fun coverEntryPoints(
         screen: Screen?,
-        today: LocalDate,
+        blocked: Boolean,
     ) {
-        val blocked = screen != null && screen.surface == null && decision(screen.app, today) is Decision.Block
-        val entryPoints = if (blocked) screen.entryPoints else emptyList()
+        val entryPoints = screen?.entryPoints?.takeIf { blocked }.orEmpty()
         isCovering = entryPoints.isNotEmpty()
         actions.cover(entryPoints)
+    }
+
+    /**
+     * Leaves a page that lists only Reels while the app is [blocked] (ADR 0009), once each time it comes into view: if
+     * the app does not move, the guard does not keep trying against the user.
+     */
+    private fun leaveReelsPage(
+        screen: Screen?,
+        blocked: Boolean,
+    ) {
+        val page = screen?.reelsPage?.takeIf { blocked }
+        if (page != null && page != leftPage) actions.leave(screen.app, page)
+        leftPage = page
     }
 
     /**
