@@ -13,3 +13,4 @@ it. Records are never rewritten; a changed decision gets a new record that super
 | [0006](0006-quality-gates.md) | Quality gates and their tools | Accepted |
 | [0007](0007-allowances-need-automatic-time-zone.md) | Allowances also need the automatic time zone | Accepted |
 | [0008](0008-cover-entry-points-with-overlays.md) | Cover Reels and Shorts entry points with overlay windows | Accepted |
+| [0009](0009-cover-only-what-stays-in-place.md) | Cover only what stays in place | Accepted |
