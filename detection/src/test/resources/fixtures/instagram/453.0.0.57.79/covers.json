@@ -1,5 +1,5 @@
 {
-  "none/explore.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/explore.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}, {"name": "explore_grid", "bounds": {"left": 0, "top": 241, "right": 1080, "bottom": 2064}}],
   "none/feed.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
   "none/feed_with_reel_preview.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
   "none/messages_inbox.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],

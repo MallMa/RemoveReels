@@ -28,6 +28,13 @@
       "name": "reels_tab",
       "viewId": "clips_tab",
       "coverColor": { "light": "#FFFFFF", "dark": "#0C1014" }
+    },
+    {
+      "name": "explore_grid",
+      "viewId": "recycler_view",
+      "containing": "preview_clip_play_count",
+      "below": "explore_action_bar",
+      "coverColor": { "light": "#FFFFFF", "dark": "#0C1014" }
     }
   ]
 }
