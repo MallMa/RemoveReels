@@ -12,14 +12,16 @@ import java.io.File
 /**
  * Runs the bundled rules against screens recorded on a phone, stored as
  * `fixtures/<app>/<app version>/<expected surface, or none>/<screen>.json`. Each version folder's `covers.json`
- * lists the entry points that must be covered on its screens.
+ * lists the entry points that must be covered on its screens, and its `pages.json` the screens whose Reels page must
+ * be left.
  */
 class BundledRulesTest {
     private val rules = BundledRules.load()
     private val detector = SurfaceDetector(rules)
     private val root = File(checkNotNull(javaClass.getResource("/fixtures")).toURI())
     private val fixtures = loadFixtures()
-    private val covers = loadCovers()
+    private val covers = loadExpectations<List<ExpectedCover>>(COVERS_FILE)
+    private val pages = loadExpectations<String>(PAGES_FILE)
 
     @TestFactory
     fun `every recorded screen shows the surface its folder names`(): List<DynamicTest> =
@@ -62,8 +64,10 @@ class BundledRulesTest {
                 .flatMap { app ->
                     val signals = app.surfaces.flatMap { it.anyOf + it.allOf }.map { it.viewId }
                     val canary = listOfNotNull(app.canary?.anchorViewId, app.canary?.expectedViewId)
-                    val entryPoints = app.entryPoints.flatMap { listOfNotNull(it.viewId, it.within) }
-                    (signals + canary + entryPoints + listOfNotNull(app.homeTabViewId)).map(app::fullViewId)
+                    val entryPoints =
+                        app.entryPoints.flatMap { listOfNotNull(it.viewId, it.within, it.containing, it.below) }
+                    val pages = app.reelsPages.flatMap { listOf(it.viewId, it.pager) }
+                    (signals + canary + entryPoints + pages + listOfNotNull(app.homeTabViewId)).map(app::fullViewId)
                 }.toSet()
 
         assertThat(recorded).containsAtLeastElementsIn(named)
@@ -102,6 +106,16 @@ class BundledRulesTest {
     }
 
     @TestFactory
+    fun `every recorded screen leaves exactly the Reels page listed for it`(): List<DynamicTest> =
+        fixtures.map { fixture ->
+            dynamicTest(fixture.path) {
+                val page = detector.findReelsPage(fixture.snapshot.packageName, fixture.snapshot)
+
+                assertThat(page?.name).isEqualTo(pages[fixture.path])
+            }
+        }
+
+    @TestFactory
     fun `fixtures are stored exactly as the recorder writes them`(): List<DynamicTest> =
         fixtures.map { fixture ->
             dynamicTest(fixture.path) { assertThat(fixture.snapshot.toJson()).isEqualTo(fixture.text) }
@@ -124,27 +138,28 @@ class BundledRulesTest {
     private fun loadFixtures(): List<Fixture> =
         root
             .walk()
-            .filter { it.extension == "json" && it.name != COVERS_FILE }
+            .filter { it.extension == "json" && it.name !in EXPECTATION_FILES }
             .map { Fixture(it.relativeTo(root).invariantSeparatorsPath, it.readText()) }
             .sortedBy { it.path }
             .toList()
 
-    /** Every version folder's covers, keyed by screen path from the fixtures folder. */
-    private fun loadCovers(): Map<String, List<ExpectedCover>> =
+    /** Every version folder's expectations in [fileName], keyed by screen path from the fixtures folder. */
+    private inline fun <reified T> loadExpectations(fileName: String): Map<String, T> =
         root
             .walk()
-            .filter { it.name == COVERS_FILE }
+            .filter { it.name == fileName }
             .flatMap { file ->
                 val folder = file.parentFile.relativeTo(root).invariantSeparatorsPath
                 Json
-                    .decodeFromString<Map<String, List<ExpectedCover>>>(
-                        file.readText(),
-                    ).mapKeys { "$folder/${it.key}" }
+                    .decodeFromString<Map<String, T>>(file.readText())
+                    .mapKeys { "$folder/${it.key}" }
                     .entries
             }.associate { it.key to it.value }
 
     private companion object {
         const val NO_SURFACE = "none"
         const val COVERS_FILE = "covers.json"
+        const val PAGES_FILE = "pages.json"
+        val EXPECTATION_FILES = setOf(COVERS_FILE, PAGES_FILE)
     }
 }

@@ -44,7 +44,16 @@ public class SurfaceDetector(
         tree: ScreenTree,
     ): List<EntryPoint> {
         val rules = rulesByPackage[packageName] ?: return emptyList()
-        return rules.entryPoints.flatMap { rules.find(it, tree) }
+        return rules.findEntryPoints(tree)
+    }
+
+    /** The page that lists only Reels [tree], a screen of [packageName], shows; null if it shows none. */
+    public fun findReelsPage(
+        packageName: String,
+        tree: ScreenTree,
+    ): ReelsPageRule? {
+        val rules = rulesByPackage[packageName] ?: return null
+        return rules.findReelsPage(tree)
     }
 
     public fun checkCanary(
@@ -74,36 +83,6 @@ public class SurfaceDetector(
                 (signal.selected == null || node.isSelected == signal.selected) &&
                 node.bounds.shareOf(tree.screen) >= signal.minScreenShare
         }
-
-    private fun AppRules.find(
-        rule: EntryPointRule,
-        tree: ScreenTree,
-    ): List<EntryPoint> {
-        val containers = rule.within?.let { within -> visibleBounds(within, tree) }
-        val marks =
-            tree
-                .findByViewId(fullViewId(rule.viewId))
-                .filter { it.isVisibleToUser && (containers == null || containers.any { area -> it.bounds in area }) }
-                .sortedWith(compareBy({ it.bounds.left }, { it.bounds.top }))
-        val chosen =
-            when {
-                rule.count != null && marks.size != rule.count -> emptyList()
-                rule.index != null -> listOf(marks[rule.index])
-                else -> marks
-            }
-        return chosen
-            .mapNotNull { it.ancestor(rule.coverParent)?.bounds?.intersect(tree.screen) }
-            .filter { it.area > 0 }
-            .map { EntryPoint(rule.name, it, rule.coverColor, rule.coverInsetTopDp) }
-    }
-
-    private fun AppRules.visibleBounds(
-        viewId: String,
-        tree: ScreenTree,
-    ): List<Bounds> = tree.findByViewId(fullViewId(viewId)).filter { it.isVisibleToUser }.map { it.bounds }
-
-    private fun ScreenNode.ancestor(levels: Int): ScreenNode? =
-        (1..levels).fold<Int, ScreenNode?>(this) { node, _ -> node?.parent }
 
     private fun AppRules.isVisible(
         viewId: String,

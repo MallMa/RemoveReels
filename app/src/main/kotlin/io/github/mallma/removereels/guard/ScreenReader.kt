@@ -22,6 +22,7 @@ internal class ScreenReader(
                 surface = detector.findSurface(app.packageName, tree),
                 canary = detector.checkCanary(app.packageName, tree),
                 entryPoints = detector.findEntryPoints(app.packageName, tree),
+                reelsPage = detector.findReelsPage(app.packageName, tree),
             )
         }
 

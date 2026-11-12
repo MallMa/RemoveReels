@@ -1,6 +1,6 @@
 # Hiding Reels and Shorts entry points
 
-Status: H0 done, H2 next · Last updated: 2026-11-09
+Status: H2 built, its phone check open · Last updated: 2026-11-11
 
 The MVP blocks a Reels or Shorts screen once it opens. This feature goes further: while an app is blocked, the ways in
 that stay in place, such as the Reels tab or Explore's grid, disappear from Instagram and YouTube, and tabs that list
@@ -42,10 +42,11 @@ blocked:
 | App | Entry point | How it is found | While blocked |
 |---|---|---|---|
 | Instagram | Reels tab in the bottom bar | `clips_tab` | Covered (H1) |
-| Instagram | Explore grid | `recycler_view` below the search bar `explore_action_bar`; every recorded tile shows a play count | Covered as a whole (H2) |
-| Instagram | Reels tab on profiles | Second tab of `profile_tab_layout`, which reports whether it is selected | The first tab is selected again (H2) |
+| Instagram | Explore grid | `recycler_view` holding a `preview_clip_play_count`, below the search bar `explore_action_bar`; at the top of Explore 10 of 12 tiles were Reels in 454, all in 453 | Covered as a whole (H2) |
+| Instagram | Reels tab on profiles | `clips_grid_recyclerview` showing inside `profile_viewpager`; other people's profiles open on it | The pager turns back to the tab before (H2) |
 | Instagram | Reels in the home feed | No distinct id yet | Visible; blocked when opened |
-| Instagram | Reels shared in chats, suggested-Reels carousels, search results | Not recorded yet | Decided in H2 by the same rules |
+| Instagram | Search screen before a search | `recycler_view` without play counts and without the Explore bar | Not covered |
+| Instagram | Reels shared in chats, suggested-Reels carousels, search results | Not recorded yet | Visible; blocked when opened, until recorded (H2b) |
 | YouTube | Shorts tab in the bottom bar | Second labelled item of `pivot_bar`; its items have no ids | Covered (H1) |
 | YouTube | Shorts shelves on Home, Subscriptions, search and watch pages | No ids at all; a horizontal row of portrait tiles | Visible; blocked when opened |
 | YouTube | Shorts tab on channels | Not recorded yet | The first tab is selected again (H3) |
@@ -53,13 +54,17 @@ blocked:
 ## Design
 
 1. **Rules stay data.** Each rule file has `entryPoints`: an entry point is found by view id, or as an item at a
-   position inside a container with a fixed number of items. H2 adds a region (a container's area below another view)
-   and a tab that is left when selected.
+   position inside a container with a fixed number of items. A region counts only while it holds a given view, and its
+   cover may start below another view (H2). `reelsPages` name lists that show only Reels and the pager they sit in.
+   Views that a rule depends on are looked up only once the rule's own view is on screen, since every lookup is a
+   request the app answers on its UI thread.
 2. **Snapshots keep the tree.** Format 2 records every view, with or without an id, and its parent, so rules that use
    positions can be tested against recorded screens.
 3. **Covers** are small accessibility-overlay windows of plain Views, coloured like what they cover, clipped to the
    screen, and hidden while the block card shows. They change only when the screen does, never per frame.
-4. **Leaving a tab** is an accessibility click on the first tab of the same row, once per selection.
+4. **Leaving a tab** turns its pager back a page with the accessibility scroll action, as a swipe would, once each
+   time the page comes into view. ADR 0009 expected a click on the first tab; the pager also works when the tab row
+   has scrolled away and when a profile has four tabs instead of three, and needs no more permission.
 5. **Battery.** No new event types and no work per frame: covers and tab changes ride on the checks the guard already
    makes, within the MVP's budget of under 1 % per day.
 
@@ -69,7 +74,8 @@ blocked:
 |---|---|---|
 | **H1 Fixed tabs** (done) | Rule format, snapshot format 2, covers; Instagram's Reels tab and YouTube's Shorts tab | Neither tab can be seen or tapped on the phone while the app is blocked; fixture tests |
 | **H0 Spike** (done) | Covers that follow scrolling, on Explore tiles and the profile tab row | Decided in [ADR 0009](adr/0009-cover-only-what-stays-in-place.md): no cover follows scrolling |
-| H2 Instagram | Explore's grid covered as a whole; a profile's Reels tab left for the first tab; chats, carousels and search results recorded and handled by the same rules | Neither Explore's grid nor a profile's Reels can be seen on the phone while blocked, and no other screen changes |
+| **H2 Instagram** (built) | Explore's grid covered as a whole; a profile's Reels page left; Instagram 454 recorded | Neither Explore's grid nor a profile's Reels can be seen on the phone while blocked, and no other screen changes |
+| H2b Instagram, recorded with the user | Chats with shared Reels, suggested-Reels carousels and search results, which need the user's own chats and searches, recorded and handled by the same rules | The same for those screens |
 | H3 YouTube | A channel's Shorts tab left for the first tab; channels and search recorded | The same for YouTube |
 | H4 Polish | TalkBack, landscape, split screen, large fonts; About lists what is hidden | The MVP's acceptance criteria still pass |
 

@@ -23,5 +23,13 @@ internal class ServiceNavigation(
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
     }
 
+    /** Turns the visible pager with the full id [viewId] back a page, as swiping to the tab before would. */
+    fun turnBack(viewId: String) {
+        service.rootInActiveWindow
+            ?.findAccessibilityNodeInfosByViewId(viewId)
+            ?.firstOrNull { it.isVisibleToUser }
+            ?.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD)
+    }
+
     override fun isOnSurface(): Boolean = onSurface()
 }

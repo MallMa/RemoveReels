@@ -99,6 +99,70 @@ class EntryPointsTest {
             .containsExactly(EntryPoint("reels", Bounds(0, 1950, 200, 2000)))
     }
 
+    /** A grid of tiles whose top a search bar slides over; one tile shows a play count unless [playCount] is false. */
+    private fun grid(
+        top: Int = 100,
+        searchBar: Boolean = true,
+        playCount: Boolean = true,
+    ) = listOfNotNull(
+        SnapshotNode("$APP:id/grid", "android.widget.GridView", Bounds(0, top, 1000, 1900), true, parent = 0),
+        SnapshotNode("$APP:id/search", "android.widget.FrameLayout", Bounds(0, 100, 1000, 250), searchBar, parent = 0),
+        SnapshotNode("$APP:id/plays", "android.widget.TextView", Bounds(20, 800, 120, 840), true, parent = 1)
+            .takeIf { playCount },
+    )
+
+    private val wholeGrid = EntryPointRule("grid", viewId = "grid", containing = "plays", below = "search")
+
+    @Test
+    fun `covers a whole region below the view that slides over its top`() {
+        assertThat(find(wholeGrid, grid())).containsExactly(EntryPoint("grid", Bounds(0, 250, 1000, 1900)))
+    }
+
+    @Test
+    fun `starts a region's cover no higher than the region`() {
+        assertThat(find(wholeGrid, grid(top = 300))).containsExactly(EntryPoint("grid", Bounds(0, 300, 1000, 1900)))
+    }
+
+    @Test
+    fun `covers a region only while it shows the view it must contain`() {
+        assertThat(find(wholeGrid, grid(playCount = false))).isEmpty()
+    }
+
+    @Test
+    fun `covers nothing without the view to start below`() {
+        assertThat(find(wholeGrid, grid(searchBar = false))).isEmpty()
+    }
+
+    @Test
+    fun `asks the app for the views a region depends on only while the region shows`() {
+        val asked = mutableListOf<String>()
+        val recorded = screenWith(emptyList())
+        val tree =
+            object : ScreenTree {
+                override val screen = recorded.screen
+
+                override fun findByViewId(viewId: String): List<ScreenNode> =
+                    recorded.findByViewId(viewId).also { asked += viewId }
+            }
+        val rules =
+            AppRules(
+                APP,
+                "1.0",
+                listOf(SurfaceRule("viewer", listOf(Signal("player")))),
+                entryPoints = listOf(wholeGrid),
+            )
+
+        SurfaceDetector(listOf(rules)).findEntryPoints(APP, tree)
+
+        assertThat(asked).containsExactly("$APP:id/grid")
+    }
+
+    @Test
+    fun `rejects blank ids to contain or to start below`() {
+        assertThrows<IllegalArgumentException> { EntryPointRule("grid", "grid", containing = " ") }
+        assertThrows<IllegalArgumentException> { EntryPointRule("grid", "grid", below = "") }
+    }
+
     @Test
     fun `knows no entry points of apps without rules`() {
         val rules = AppRules(APP, "1.0", listOf(SurfaceRule("viewer", listOf(Signal("player")))))

@@ -10,6 +10,7 @@ import io.github.mallma.removereels.budget.BlockReason
 import io.github.mallma.removereels.budget.TargetApp
 import io.github.mallma.removereels.budget.WatchTimer
 import io.github.mallma.removereels.detection.EntryPoint
+import io.github.mallma.removereels.detection.ReelsPageRule
 import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.guard.overlay.BlockCard
 import io.github.mallma.removereels.guard.overlay.BlockNotice
@@ -48,7 +49,8 @@ internal class GuardHost(
     private val covers = EntryPointCovers(service)
     private val timeLeft = mutableStateOf(Duration.ZERO)
     private var timerHiddenByUser = false
-    private val backOut = BackOut(ServiceNavigation(service, screenReader::isOnSurface), BACK_OUT_SETTLE)
+    private val navigation = ServiceNavigation(service, screenReader::isOnSurface)
+    private val backOut = BackOut(navigation, BACK_OUT_SETTLE)
     private val guard =
         Guard(container.clock, container.automaticTime, container.stateStore, WatchTimer(container.timeSource), this)
     private val checks =
@@ -120,6 +122,13 @@ internal class GuardHost(
     override fun surfaceGone() = audioFocus.release()
 
     override fun cover(entryPoints: List<EntryPoint>) = covers.show(entryPoints)
+
+    override fun leave(
+        app: TargetApp,
+        page: ReelsPageRule,
+    ) {
+        detector.rulesFor(app.packageName)?.let { navigation.turnBack(it.fullViewId(page.pager)) }
+    }
 
     private suspend fun checkScreen() {
         val screen = screenReader.read()

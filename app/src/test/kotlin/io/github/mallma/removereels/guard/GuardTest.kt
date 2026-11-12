@@ -11,6 +11,7 @@ import io.github.mallma.removereels.budget.WatchTimer
 import io.github.mallma.removereels.detection.Bounds
 import io.github.mallma.removereels.detection.CanaryResult
 import io.github.mallma.removereels.detection.EntryPoint
+import io.github.mallma.removereels.detection.ReelsPageRule
 import io.github.mallma.removereels.detection.Signal
 import io.github.mallma.removereels.detection.SurfaceRule
 import io.github.mallma.removereels.storage.AppState
@@ -44,6 +45,9 @@ class GuardTest {
     private val youtubeHome = Screen(TargetApp.YOUTUBE, surface = null)
     private val tab = EntryPoint("reels_tab", Bounds(216, 2064, 432, 2190))
     private val instagramFeed = Screen(TargetApp.INSTAGRAM, surface = null, entryPoints = listOf(tab))
+    private val reelsPage = ReelsPageRule("profile_reels", viewId = "clips_grid", pager = "profile_pager")
+    private val profileOnReels = Screen(TargetApp.INSTAGRAM, surface = null, reelsPage = reelsPage)
+    private val profileOnPosts = Screen(TargetApp.INSTAGRAM, surface = null)
 
     private fun guard(
         instagram: Int = 0,
@@ -234,6 +238,40 @@ class GuardTest {
         }
 
     @Test
+    fun `leaves a page that lists only Reels while the app is blocked`() =
+        runTest {
+            val (guard, _) = guard(instagram = 0)
+
+            guard.check(profileOnReels)
+
+            assertThat(actions.left).containsExactly(reelsPage)
+        }
+
+    @Test
+    fun `leaves a Reels page once each time it comes into view`() =
+        runTest {
+            val (guard, _) = guard(instagram = 0)
+
+            guard.check(profileOnReels)
+            guard.check(profileOnReels)
+            assertThat(actions.left).hasSize(1)
+
+            guard.check(profileOnPosts)
+            guard.check(profileOnReels)
+            assertThat(actions.left).hasSize(2)
+        }
+
+    @Test
+    fun `stays on a Reels page while the allowance has time left`() =
+        runTest {
+            val (guard, _) = guard(youtube = 15)
+
+            guard.check(youtubeHome.copy(reelsPage = reelsPage))
+
+            assertThat(actions.left).isEmpty()
+        }
+
+    @Test
     fun `blocks while automatic date and time is off`() =
         runTest {
             val (guard, _) = guard(youtube = 15)
@@ -333,6 +371,16 @@ class GuardTest {
 
         override fun cover(entryPoints: List<EntryPoint>) {
             covers += entryPoints
+        }
+
+        /** The Reels pages left, in order. */
+        val left = mutableListOf<ReelsPageRule>()
+
+        override fun leave(
+            app: TargetApp,
+            page: ReelsPageRule,
+        ) {
+            left += page
         }
     }
 }

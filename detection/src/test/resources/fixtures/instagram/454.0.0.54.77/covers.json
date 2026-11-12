@@ -1,0 +1,11 @@
+{
+  "none/explore.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}, {"name": "explore_grid", "bounds": {"left": 0, "top": 241, "right": 1080, "bottom": 2064}}],
+  "none/explore_scrolled.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}, {"name": "explore_grid", "bounds": {"left": 0, "top": 109, "right": 1080, "bottom": 2064}}],
+  "none/explore_scrolled_to_top.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}, {"name": "explore_grid", "bounds": {"left": 0, "top": 283, "right": 1080, "bottom": 2064}}],
+  "none/other_profile.json": [],
+  "none/other_profile_reels_tab.json": [],
+  "none/own_profile.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/own_profile_reels_tab.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/own_profile_reels_tab_scrolled.json": [{"name": "reels_tab", "bounds": {"left": 216, "top": 2064, "right": 432, "bottom": 2190}}],
+  "none/search.json": []
+}

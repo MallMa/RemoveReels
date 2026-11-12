@@ -20,6 +20,8 @@ public data class AppRules(
     public val homeTabViewId: String? = null,
     /** The ways into the surfaces, covered while the app is blocked. */
     public val entryPoints: List<EntryPointRule> = emptyList(),
+    /** Pages that list only Reels, left while the app is blocked. */
+    public val reelsPages: List<ReelsPageRule> = emptyList(),
 ) {
     init {
         require(packageName.isNotBlank()) { "Rules need a package name" }
@@ -28,6 +30,9 @@ public data class AppRules(
         require(surfaces.map { it.name }.toSet().size == surfaces.size) { "Rules for $packageName repeat a surface" }
         require(entryPoints.map { it.name }.toSet().size == entryPoints.size) {
             "Rules for $packageName repeat an entry point"
+        }
+        require(reelsPages.map { it.name }.toSet().size == reelsPages.size) {
+            "Rules for $packageName repeat a Reels page"
         }
     }
 

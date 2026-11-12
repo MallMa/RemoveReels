@@ -9,6 +9,9 @@ import kotlinx.serialization.Serializable
  * When several views look alike, as the items of a tab bar without ids do, [within], [count] and [index] pick one:
  * the marks inside [within] must number exactly [count], or the layout has changed and nothing is covered, and [index]
  * counts them from the left.
+ *
+ * A whole region, such as a grid that shows little but Reels, is a mark [containing] a view that only Reels show, and
+ * its cover may start [below] a view that slides over its top.
  */
 @Serializable
 public data class EntryPointRule(
@@ -17,6 +20,10 @@ public data class EntryPointRule(
     public val within: String? = null,
     public val count: Int? = null,
     public val index: Int? = null,
+    /** Only marks with a visible view of this id inside them count, such as a grid while it shows a play count. */
+    public val containing: String? = null,
+    /** The cover starts below the visible view with this id, such as a search bar; without it, nothing is covered. */
+    public val below: String? = null,
     /** Cover the view this many levels above the mark, such as the whole tab around its icon. */
     public val coverParent: Int = 0,
     /** The colour of what the cover hides, such as the app's tab bar, so that the entry point seems to be gone. */
@@ -31,8 +38,26 @@ public data class EntryPointRule(
         require(index == null || (count != null && index in 0 until count)) {
             "Entry point $name needs a count that includes its index"
         }
+        require(containing?.isNotBlank() ?: true) { "Entry point $name needs a view id for what it contains" }
+        require(below?.isNotBlank() ?: true) { "Entry point $name needs a view id to start below" }
         require(coverParent >= 0) { "Entry point $name cannot cover a view below its mark" }
         require(coverInsetTopDp >= 0) { "Entry point $name needs an inset of zero or more" }
+    }
+}
+
+/**
+ * A page that lists only Reels, such as the Reels tab of a profile, marked by its list [viewId] showing inside the
+ * [pager] that holds the tabs' pages. While the app is blocked, the pager is turned back to the page before.
+ */
+@Serializable
+public data class ReelsPageRule(
+    public val name: String,
+    public val viewId: String,
+    public val pager: String,
+) {
+    init {
+        require(name.isNotBlank()) { "A Reels page needs a name" }
+        require(viewId.isNotBlank() && pager.isNotBlank()) { "Reels page $name needs the view ids of list and pager" }
     }
 }
 
